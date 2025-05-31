@@ -17,9 +17,7 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 /// The player character.
-// TODO spawn from Level
 pub fn player(
-    max_speed: f32,
     player_assets: &PlayerAssets,
     texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
 ) -> impl Bundle {
@@ -40,7 +38,7 @@ pub fn player(
             }),
             ..default()
         },
-        Transform::from_scale(Vec2::splat(8.0).extend(1.0)),
+        Transform::from_scale(Vec2::splat(1.0).extend(1.0)),
     )
 }
 
