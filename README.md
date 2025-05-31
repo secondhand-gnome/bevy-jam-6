@@ -16,3 +16,4 @@ Check out the [documentation](https://github.com/TheBevyFlock/bevy_new_2d/blob/m
   - Chain cutters - from [Generic Items](https://www.kenney.nl/assets/generic-items)
   - Rat - from [Platformer Art Extended Enemies](https://www.kenney.nl/assets/platformer-art-extended-enemies)
   - Chain - from [Platformer Art Pixel Redux](https://www.kenney.nl/assets/platformer-art-pixel-redux)
+  - Gnome Head - from [Voxel Pack](https://www.kenney.nl/assets/voxel-pack)

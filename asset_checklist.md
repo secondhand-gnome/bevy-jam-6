@@ -12,8 +12,8 @@
 - [x] Farmer
 - [x] Seedling
 - [ ] Pineapple
-- [ ] Dragonfruit
-- [ ] Leshy
+- [x] Dragonfruit
+- [x] Leshy
 - [x] Evil rat
 - [ ] Evil bunny
 - [ ] Coin/money bag
