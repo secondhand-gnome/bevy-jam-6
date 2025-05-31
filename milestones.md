@@ -27,11 +27,13 @@
 - [ ] A Leshy plant headbutts nearby enemies
 - [ ] A Leshy can catch, throw, and plant seeds
 
-## Milestone 5
+## Milestone 5 (MVP)
 
 - [ ] harvest 3 daisies in a row to make a Daisy Chain. A nearby Leshy will throw it to you.
 - [ ] Sell a Daisy Chain for money
 - [ ] Spend money on seedlings (they are no longer free)
+- [ ] Win condition: $150
+- [ ] Lose condition: no money and not enough seeds or daisies to win
 
 ## Milestone 6
 
