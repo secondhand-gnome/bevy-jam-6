@@ -24,7 +24,7 @@
 
 #### Other art
 
-- [ ] Barn
+- [x] Barn
 - [ ] Cows or other decorations
 
 ### Sound
