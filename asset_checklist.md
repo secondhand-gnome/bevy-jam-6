@@ -19,7 +19,7 @@
 - [ ] Coin/money bag
 - [ ] Daisy
 - [ ] Daisy chain
-- [ ] Chain cutter
+- [x] Chain cutter
 
 #### Other art
 

@@ -7,3 +7,6 @@ Check out the [documentation](https://github.com/TheBevyFlock/bevy_new_2d/blob/m
 
 - Thanks to TheBevyFlock for providing [bevy_cli](https://github.com/TheBevyFlock/bevy_cli) and
   the [bevy_new_2d](https://github.com/TheBevyFlock/bevy_new_2d) template.
+
+- Thanks to [Kenney](https://www.kenney.nl/) for the following assets:
+  - `chain_cutters.png` - from [Generic Items](https://www.kenney.nl/assets/generic-items)
