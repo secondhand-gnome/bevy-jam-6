@@ -10,14 +10,14 @@
 #### Sprites
 
 - [x] Farmer
-- [ ] Seedling
+- [x] Seedling
 - [ ] Pineapple
 - [ ] Dragonfruit
 - [ ] Leshy
-- [ ] Evil rat
+- [x] Evil rat
 - [ ] Evil bunny
 - [ ] Coin/money bag
-- [ ] Daisy
+- [x] Daisy
 - [ ] Daisy chain
 - [x] Chain cutter
 

@@ -10,5 +10,8 @@ Check out the [documentation](https://github.com/TheBevyFlock/bevy_new_2d/blob/m
 
 - Thanks to [Kenney](https://www.kenney.nl/) for the following assets:
   - Farmer - from [Sokoban](https://www.kenney.nl/assets/sokoban)
+  - Daisy - from Voxel Expansion Pack
   - Grass and Dirt tiles - from [Racing Pack](https://www.kenney.nl/assets/racing-pack)
+  - Plants - from [Abstract Platformer](https://www.kenney.nl/assets/abstract-platformer)
   - Chain cutters - from [Generic Items](https://www.kenney.nl/assets/generic-items)
+  - Rat - from [Platformer Art Extended Enemies](https://www.kenney.nl/assets/platformer-art-extended-enemies)
