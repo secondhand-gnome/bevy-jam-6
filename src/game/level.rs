@@ -2,13 +2,14 @@
 
 use bevy::prelude::*;
 
+use crate::game::barn::{BarnAssets, barn};
 use crate::{
     asset_tracking::LoadResource,
     audio::music,
     game::player::{PlayerAssets, player},
     screens::Screen,
 };
-use crate::game::barn::{barn, BarnAssets};
+use crate::game::farm::{farm, FarmAssets};
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<LevelAssets>();
@@ -34,6 +35,7 @@ impl FromWorld for LevelAssets {
 /// A system that spawns the main level.
 pub fn spawn_level(
     mut commands: Commands,
+    farm_assets: Res<FarmAssets>,
     barn_assets: Res<BarnAssets>,
     level_assets: Res<LevelAssets>,
     player_assets: Res<PlayerAssets>,
@@ -45,6 +47,7 @@ pub fn spawn_level(
         Visibility::default(),
         StateScoped(Screen::Gameplay),
         children![
+            farm(&farm_assets),
             barn(&barn_assets),
             player(&player_assets, &mut texture_atlas_layouts),
             (
