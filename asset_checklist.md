@@ -20,6 +20,7 @@
 - [x] Daisy
 - [ ] Daisy chain
 - [x] Chain cutter
+- [x] Mailbox
 
 #### Other art
 
