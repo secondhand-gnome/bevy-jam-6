@@ -11,7 +11,7 @@
 
 - [x] Farmer
 - [x] Seedling
-- [ ] Pineapple
+- [x] Pineapple
 - [x] Dragonfruit
 - [x] Leshy
 - [x] Evil rat

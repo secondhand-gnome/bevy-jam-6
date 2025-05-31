@@ -18,3 +18,5 @@ Check out the [documentation](https://github.com/TheBevyFlock/bevy_new_2d/blob/m
   - Chain - from [Platformer Art Pixel Redux](https://www.kenney.nl/assets/platformer-art-pixel-redux)
   - Gnome Head - from [Voxel Pack](https://www.kenney.nl/assets/voxel-pack)
   - Coin - from [Physics Assets](https://www.kenney.nl/assets/physics-assets)
+
+- Thanks to [Master484](http://m484games.ucoz.com/) for [Good Fruits](https://opengameart.org/content/good-fruits-m484-games)
