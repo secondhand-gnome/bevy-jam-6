@@ -4,8 +4,8 @@
 
 #### Tiles
 
-- [ ] Grass
-- [ ] Soil
+- [x] Grass
+- [x] Soil
 
 #### Sprites
 

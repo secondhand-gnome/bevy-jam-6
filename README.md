@@ -10,4 +10,5 @@ Check out the [documentation](https://github.com/TheBevyFlock/bevy_new_2d/blob/m
 
 - Thanks to [Kenney](https://www.kenney.nl/) for the following assets:
   - Farmer - from [Sokoban](https://www.kenney.nl/assets/sokoban)
+  - Grass and Dirt tiles - from [Racing Pack](https://www.kenney.nl/assets/racing-pack)
   - Chain cutters - from [Generic Items](https://www.kenney.nl/assets/generic-items)
