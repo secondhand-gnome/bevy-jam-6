@@ -18,7 +18,7 @@ pub fn barn(barn_assets: &BarnAssets) -> impl Bundle {
             image: barn_assets.house.clone(),
             ..default()
         },
-        Transform::from_translation(Vec3::new(0.0, 1.0, 0.0)),
+        Transform::from_translation(Vec3::new(-350.0, 30.0, 0.0)),
     )
 }
 
