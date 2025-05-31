@@ -8,10 +8,10 @@ mod audio;
 mod demo;
 #[cfg(feature = "dev")]
 mod dev_tools;
+mod game;
 mod menus;
 mod screens;
 mod theme;
-mod game;
 
 use bevy::{asset::AssetMetaCheck, prelude::*};
 
@@ -48,7 +48,6 @@ impl Plugin for AppPlugin {
         app.add_plugins((
             asset_tracking::plugin,
             audio::plugin,
-            demo::plugin, // TODO remove demo
             game::plugin,
             #[cfg(feature = "dev")]
             dev_tools::plugin,

@@ -8,6 +8,8 @@ use bevy::{
 use crate::screens::Screen;
 
 pub(super) fn plugin(app: &mut App) {
+    app.add_plugins(bevy_inspector_egui::DefaultInspectorConfigPlugin);
+
     // Log `Screen` state transitions.
     app.add_systems(Update, log_transitions::<Screen>);
 
