@@ -9,7 +9,7 @@
 
 #### Sprites
 
-- [ ] Farmer
+- [x] Farmer
 - [ ] Seedling
 - [ ] Pineapple
 - [ ] Dragonfruit
