@@ -107,6 +107,7 @@ pub enum PlayerAnimationState {
     Walking,
 }
 
+// TODO update player animation based on what the farmer is doing
 impl PlayerAnimation {
     /// The number of idle frames.
     const IDLE_FRAMES: usize = 2;
