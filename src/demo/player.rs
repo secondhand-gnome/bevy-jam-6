@@ -37,7 +37,7 @@ pub fn player(
 ) -> impl Bundle {
     // A texture atlas is a way to split a single image into a grid of related images.
     // You can learn more in this example: https://github.com/bevyengine/bevy/blob/latest/examples/2d/texture_atlas.rs
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), 6, 2, Some(UVec2::splat(1)), None);
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(64), 3, 1, Some(UVec2::splat(1)), None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
     let player_animation = PlayerAnimation::new();
 
@@ -45,7 +45,7 @@ pub fn player(
         Name::new("Player"),
         Player,
         Sprite {
-            image: player_assets.ducky.clone(),
+            image: player_assets.farmer.clone(),
             texture_atlas: Some(TextureAtlas {
                 layout: texture_atlas_layout,
                 index: player_animation.get_atlas_index(),
@@ -99,7 +99,7 @@ fn record_player_directional_input(
 #[reflect(Resource)]
 pub struct PlayerAssets {
     #[dependency]
-    ducky: Handle<Image>,
+    farmer: Handle<Image>,
     #[dependency]
     pub steps: Vec<Handle<AudioSource>>,
 }
@@ -108,8 +108,8 @@ impl FromWorld for PlayerAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {
-            ducky: assets.load_with_settings(
-                "images/ducky.png",
+            farmer: assets.load_with_settings(
+                "images/farmer.png",
                 |settings: &mut ImageLoaderSettings| {
                     // Use `nearest` image sampling to preserve pixel art style.
                     settings.sampler = ImageSampler::nearest();
