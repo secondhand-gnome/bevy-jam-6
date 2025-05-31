@@ -2,7 +2,7 @@
 
 ## Milestone 1
 
-- [ ] Stationary farmer in a house
+- [x] Stationary farmer in a house
 - [ ] Grid of farm tiles outside the farmhouse
 - [ ] Throw a seed at a specific empty tile
 - [ ] Seedling grows when it lands on the tile

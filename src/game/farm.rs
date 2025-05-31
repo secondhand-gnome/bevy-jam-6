@@ -1,11 +1,8 @@
 use crate::asset_tracking::LoadResource;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
-use bevy_ecs_tilemap::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_plugins(TilemapPlugin);
-
     app.register_type::<Farm>();
 
     app.register_type::<FarmAssets>();
