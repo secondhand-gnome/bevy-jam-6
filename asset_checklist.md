@@ -16,7 +16,7 @@
 - [x] Leshy
 - [x] Evil rat
 - [ ] Evil bunny
-- [ ] Coin/money bag
+- [x] Coin/money bag
 - [x] Daisy
 - [ ] Daisy chain
 - [x] Chain cutter
