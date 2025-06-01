@@ -1,8 +1,10 @@
 use crate::asset_tracking::LoadResource;
+use crate::audio::sound_effect;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy_vector_shapes::painter::ShapePainter;
 use bevy_vector_shapes::prelude::*;
+use rand::prelude::SliceRandom;
 
 const PLANT_RADIUS_PX: f32 = 30.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
@@ -53,6 +55,8 @@ pub struct PlantAssets {
     pineapple: Handle<Image>,
     #[dependency]
     seedling: Handle<Image>,
+    #[dependency]
+    sow_sounds: Vec<Handle<AudioSource>>,
 }
 
 #[derive(Event, Debug, Default)]
@@ -98,6 +102,10 @@ impl FromWorld for PlantAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+            sow_sounds: vec![
+                assets.load("audio/sound_effects/sow1.ogg"),
+                assets.load("audio/sound_effects/sow2.ogg"),
+            ],
         }
     }
 }
@@ -110,6 +118,13 @@ fn sow_plants(
     for event in sow_events.read() {
         println!("Plant spawned at {:?}", event.position);
         commands.spawn(plant(event.position, &plant_assets));
+
+        let rng = &mut rand::thread_rng();
+        let random_sow_sound = plant_assets.sow_sounds.choose(rng).unwrap().clone();
+        commands.spawn((
+            sound_effect(random_sow_sound),
+            Transform::from_translation(event.position.extend(0.)),
+        ));
     }
 }
 

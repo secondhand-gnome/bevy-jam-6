@@ -19,5 +19,6 @@ https://secondhandgnome.itch.io/bevy-jam-6
   - Coin - from [Physics Assets](https://www.kenney.nl/assets/physics-assets)
   - Box - from [Platformer Bricks](https://www.kenney.nl/assets/platformer-bricks)
   - House - from [Background Elements](https://www.kenney.nl/assets/background-elements)
+  - Sounds from [Casino Audio](https://kenney.nl/assets/casino-audio)
 
 - Thanks to [Master484](http://m484games.ucoz.com/) for [Good Fruits](https://opengameart.org/content/good-fruits-m484-games)
