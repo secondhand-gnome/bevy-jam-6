@@ -1,5 +1,6 @@
 //! Player-specific behavior.
 
+use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use bevy::input::common_conditions::*;
@@ -21,7 +22,9 @@ pub(super) fn plugin(app: &mut App) {
 
     app.add_systems(
         Update,
-        on_click.run_if(input_just_pressed(MouseButton::Left)),
+        on_click
+            .run_if(input_just_pressed(MouseButton::Left))
+            .in_set(PausableSystems),
     );
 
     app.add_systems(

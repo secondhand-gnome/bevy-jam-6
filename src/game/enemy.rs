@@ -1,5 +1,6 @@
 //! Enemies eat plants.
 
+use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use crate::game::physics::GameLayer;
@@ -28,14 +29,12 @@ pub(super) fn plugin(app: &mut App) {
 
     app.add_systems(
         Update,
-        (
-            tick_spawn,
-            tick_bite_cooldowns,
-            pursue_plants,
-            draw_eat_radius,
-        )
-            .run_if(resource_exists::<EnemyAssets>),
+        (tick_spawn, tick_bite_cooldowns, pursue_plants)
+            .run_if(resource_exists::<EnemyAssets>)
+            .in_set(PausableSystems),
     );
+
+    app.add_systems(Update, draw_eat_radius);
 }
 
 pub fn enemy_spawner(transform: Transform, spawn_height: f32) -> impl Bundle {

@@ -1,3 +1,4 @@
+use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use crate::game::health::Health;
@@ -24,9 +25,15 @@ pub(super) fn plugin(app: &mut App) {
     app.add_event::<DamagePlantEvent>();
     app.add_systems(
         Update,
-        (sow_plants, tick_growth, damage_plants).run_if(resource_exists::<PlantAssets>),
+        (sow_plants, damage_plants).run_if(resource_exists::<PlantAssets>),
     );
-    app.add_systems(Update, (draw_plant_circles, draw_health));
+    app.add_systems(
+        Update,
+        tick_growth
+            .run_if(resource_exists::<PlantAssets>)
+            .in_set(PausableSystems),
+    );
+    app.add_systems(Update, (draw_plant_circles, draw_growth, draw_health));
 }
 
 fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
@@ -161,6 +168,33 @@ fn draw_plant_circles(mut painter: ShapePainter, q_plants: Query<&Transform, Wit
     }
 }
 
+fn draw_growth(
+    mut painter: ShapePainter,
+    q_growing_plants: Query<(&mut Transform, &mut GrowthTimer), With<Plant>>,
+) {
+    const PROGRESS_HEIGHT_PX: f32 = PLANT_RADIUS_PX * 0.2;
+    const PROGRESS_LENGTH_PX: f32 = PLANT_RADIUS_PX * 1.;
+    const PROGRESS_DIMENS: Vec2 = Vec2::new(PROGRESS_LENGTH_PX, PROGRESS_HEIGHT_PX);
+    const PROGRESS_OFFSET: Vec3 = Vec3::new(0., -1.1 * PLANT_RADIUS_PX, 0.);
+
+    for (transform, growth_timer) in q_growing_plants {
+        // Draw the remaining time
+        painter.transform.translation = transform.translation + PROGRESS_OFFSET;
+        painter.hollow = true;
+        painter.thickness = 0.5;
+        painter.color = PLANT_GROWTH_OUTLINE;
+        painter.rect(PROGRESS_DIMENS);
+
+        let progress = growth_timer.0.fraction();
+        painter.hollow = false;
+        painter.color = PLANT_GROWTH_FOREGROUND;
+        painter.rect(Vec2::new(
+            PROGRESS_DIMENS.x * progress,
+            PROGRESS_DIMENS.y * 0.8,
+        ));
+    }
+}
+
 fn draw_health(mut painter: ShapePainter, q_plants: Query<(&Transform, &Health), With<Plant>>) {
     const HEALTH_HEIGHT_PX: f32 = PLANT_RADIUS_PX * 0.2;
     const HEALTH_LENGTH_PX: f32 = PLANT_RADIUS_PX * 1.;
@@ -186,7 +220,6 @@ fn draw_health(mut painter: ShapePainter, q_plants: Query<(&Transform, &Health),
 
 fn tick_growth(
     mut commands: Commands,
-    mut painter: ShapePainter,
     mut q_growing_plants: Query<(Entity, &mut Transform, &mut GrowthTimer)>,
     time: Res<Time>,
     plant_assets: Res<PlantAssets>,
@@ -213,26 +246,6 @@ fn tick_growth(
             ));
 
             println!("Plant {:?} finished growing", entity);
-        } else {
-            const PROGRESS_HEIGHT_PX: f32 = PLANT_RADIUS_PX * 0.2;
-            const PROGRESS_LENGTH_PX: f32 = PLANT_RADIUS_PX * 1.;
-            const PROGRESS_DIMENS: Vec2 = Vec2::new(PROGRESS_LENGTH_PX, PROGRESS_HEIGHT_PX);
-            const PROGRESS_OFFSET: Vec3 = Vec3::new(0., -1.1 * PLANT_RADIUS_PX, 0.);
-
-            // Draw the remaining time
-            painter.transform.translation = transform.translation + PROGRESS_OFFSET;
-            painter.hollow = true;
-            painter.thickness = 0.5;
-            painter.color = PLANT_GROWTH_OUTLINE;
-            painter.rect(PROGRESS_DIMENS);
-
-            let progress = growth_timer.0.fraction();
-            painter.hollow = false;
-            painter.color = PLANT_GROWTH_FOREGROUND;
-            painter.rect(Vec2::new(
-                PROGRESS_DIMENS.x * progress,
-                PROGRESS_DIMENS.y * 0.8,
-            ));
         }
     }
 }
