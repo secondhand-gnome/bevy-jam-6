@@ -37,11 +37,10 @@ pub fn farm(farm_assets: &FarmAssets) -> impl Bundle {
             ..default()
         },
         Transform::from_scale(FARM_SIZE_TILES.extend(1.)),
-        children![enemy_spawner(Transform::from_translation(Vec3::new(
-            FARM_SIZE_PX.x * 0.9,
-            0.,
-            0.
-        )))],
+        children![enemy_spawner(
+            Transform::from_translation(Vec3::new(FARM_SIZE_PX.x * 0.5, 0., 0.)),
+            FARM_SIZE_PX.y * 0.9
+        )],
     )
 }
 
