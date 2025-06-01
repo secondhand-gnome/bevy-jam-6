@@ -14,6 +14,7 @@ mod screens;
 mod theme;
 
 use bevy::{asset::AssetMetaCheck, prelude::*};
+use bevy_vector_shapes::{Shape2dPlugin, ShapePlugin};
 
 fn main() -> AppExit {
     App::new().add_plugins(AppPlugin).run()
@@ -43,6 +44,9 @@ impl Plugin for AppPlugin {
                     ..default()
                 }),
         );
+
+        // Add third-party plugins.
+        app.add_plugins(Shape2dPlugin::default());
 
         // Add other plugins.
         app.add_plugins((

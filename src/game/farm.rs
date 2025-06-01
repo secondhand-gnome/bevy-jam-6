@@ -1,13 +1,23 @@
 use crate::asset_tracking::LoadResource;
+use bevy::color::palettes::css::*;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy::sprite::SpriteImageMode::Tiled;
+use bevy_vector_shapes::prelude::*;
+
+const TILE_SIZE_PX: f32 = 128.;
+const FARM_SIZE_TILES: Vec2 = Vec2::new(10., 8.);
+const FARM_SIZE_PX: Vec2 = Vec2::new(
+    FARM_SIZE_TILES.x * TILE_SIZE_PX,
+    FARM_SIZE_TILES.y * TILE_SIZE_PX,
+);
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Farm>();
 
     app.register_type::<FarmAssets>();
     app.load_resource::<FarmAssets>();
+    app.add_systems(Update, draw_outline);
 }
 
 pub fn farm(farm_assets: &FarmAssets) -> impl Bundle {
@@ -23,7 +33,7 @@ pub fn farm(farm_assets: &FarmAssets) -> impl Bundle {
             },
             ..default()
         },
-        Transform::from_scale(Vec3::new(10., 10., 10.)),
+        Transform::from_scale(FARM_SIZE_TILES.extend(1.))
     )
 }
 
@@ -79,4 +89,10 @@ impl FromWorld for FarmAssets {
             ),
         }
     }
+}
+
+fn draw_outline(mut painter: ShapePainter) {
+    painter.hollow = true;
+    painter.thickness = 0.5;
+    painter.rect(FARM_SIZE_PX);
 }
