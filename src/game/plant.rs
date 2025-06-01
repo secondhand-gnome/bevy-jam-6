@@ -114,8 +114,8 @@ fn sow_plants(
 }
 
 fn draw_plant_circles(mut painter: ShapePainter, q_plants: Query<&Transform, With<Plant>>) {
-    for plant_pos in q_plants.iter() {
-        painter.transform = *plant_pos;
+    for plant_transform in q_plants.iter() {
+        painter.transform.translation = plant_transform.translation;
         painter.hollow = true;
         painter.thickness = 0.5;
         painter.circle(PLANT_RADIUS_PX);
@@ -124,21 +124,25 @@ fn draw_plant_circles(mut painter: ShapePainter, q_plants: Query<&Transform, Wit
 
 fn tick_growth(
     mut commands: Commands,
-    mut q_growing_plants: Query<(Entity, &mut GrowthTimer)>,
+    mut q_growing_plants: Query<(Entity, &mut Transform, &mut Sprite, &mut GrowthTimer)>,
     time: Res<Time>,
     plant_assets: Res<PlantAssets>,
 ) {
-    for (entity, mut growth_timer) in &mut q_growing_plants {
+    for (entity, mut transform, mut sprite, mut growth_timer) in &mut q_growing_plants {
         growth_timer.0.tick(time.delta());
         if growth_timer.0.finished() {
-            commands.entity(entity).remove::<GrowthTimer>();
-            commands.entity(entity).remove::<Sprite>();
+            commands
+                .entity(entity)
+                .remove::<GrowthTimer>()
+                .remove::<Sprite>()
+                .insert(Sprite {
+                    // TODO check plant type
+                    image: plant_assets.daisy.clone(),
+                    ..default()
+                });
 
             // TODO check plant type
-            commands.entity(entity).insert(Sprite {
-                image: plant_assets.daisy.clone(),
-                ..default()
-            });
+            transform.scale = Vec3::splat(0.5);
 
             println!("Plant {:?} finished growing", entity);
         }
