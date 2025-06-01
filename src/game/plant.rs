@@ -1,5 +1,6 @@
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
+use crate::theme::palette::{PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy_vector_shapes::painter::ShapePainter;
@@ -142,6 +143,7 @@ fn draw_plant_circles(mut painter: ShapePainter, q_plants: Query<&Transform, Wit
 
 fn tick_growth(
     mut commands: Commands,
+    mut painter: ShapePainter,
     mut q_growing_plants: Query<(Entity, &mut Transform, &mut GrowthTimer)>,
     time: Res<Time>,
     plant_assets: Res<PlantAssets>,
@@ -168,6 +170,23 @@ fn tick_growth(
             ));
 
             println!("Plant {:?} finished growing", entity);
+        } else {
+            const PROGRESS_HEIGHT_PX: f32 = PLANT_RADIUS_PX * 0.2;
+            const PROGRESS_LENGTH_PX: f32 = PLANT_RADIUS_PX * 1.;
+            const PROGRESS_DIMENS: Vec2 = Vec2::new(PROGRESS_LENGTH_PX, PROGRESS_HEIGHT_PX);
+            const PROGRESS_OFFSET: Vec3 = Vec3::new(0., -1.1 * PLANT_RADIUS_PX, 0.);
+
+            // Draw the remaining time
+            painter.transform.translation = transform.translation + PROGRESS_OFFSET;
+            painter.hollow = true;
+            painter.thickness = 0.5;
+            painter.color = PLANT_GROWTH_OUTLINE;
+            painter.rect(PROGRESS_DIMENS);
+
+            let progress = growth_timer.0.fraction();
+            painter.hollow = false;
+            painter.color = PLANT_GROWTH_FOREGROUND;
+            painter.rect(Vec2::new(PROGRESS_DIMENS.x * progress, PROGRESS_DIMENS.y * 0.8));
         }
     }
 }

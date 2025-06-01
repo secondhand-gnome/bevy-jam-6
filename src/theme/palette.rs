@@ -14,3 +14,8 @@ pub const BUTTON_BACKGROUND: Color = Color::srgb(0.275, 0.400, 0.750);
 pub const BUTTON_HOVERED_BACKGROUND: Color = Color::srgb(0.384, 0.600, 0.820);
 /// #3d4999
 pub const BUTTON_PRESSED_BACKGROUND: Color = Color::srgb(0.239, 0.286, 0.600);
+
+/// #0d4d48
+pub const PLANT_GROWTH_OUTLINE: Color = Color::srgb(0.051, 0.302, 0.282);
+/// #96f5d9
+pub const PLANT_GROWTH_FOREGROUND: Color = Color::srgb(0.588, 0.961, 0.851);

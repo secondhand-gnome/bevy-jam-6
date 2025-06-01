@@ -11,7 +11,7 @@
 ## Milestone 2
 
 - [x] Sounds for Milestone 1
-- [ ] Timer displays next to seedling while it grows
+- [x] Timer displays next to seedling while it grows
 - [ ] Enemies come from the right towards the nearest plant
 - [ ] Enemies inflict damage on plants by eating them
 - [ ] Plants die at 0 health
