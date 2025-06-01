@@ -1,11 +1,11 @@
 mod barn;
 mod enemy;
 mod farm;
+mod health;
 pub mod level;
 mod physics;
 mod plant;
 pub mod player;
-mod health;
 
 use crate::game::player::{PlayerClickEvent, ThrowSeedEvent};
 use avian2d::PhysicsPlugins;
