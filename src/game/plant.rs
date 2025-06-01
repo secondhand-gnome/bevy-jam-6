@@ -215,6 +215,7 @@ fn damage_plants(
     mut q_plants: Query<(Entity, &mut Health), With<Plant>>, // TODO plant health
     mut damage_plant_events: EventReader<DamagePlantEvent>,
 ) {
+    // TODO particle effects on plant damage
     for ev in damage_plant_events.read() {
         for (plant_entity, mut plant_health) in q_plants.iter_mut() {
             if plant_entity == ev.plant_entity {

@@ -1,6 +1,7 @@
 //! Enemies eat plants.
 
 use crate::asset_tracking::LoadResource;
+use crate::audio::sound_effect;
 use crate::game::physics::GameLayer;
 use crate::game::plant::{DamagePlantEvent, Plant};
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
@@ -9,6 +10,7 @@ use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy_vector_shapes::prelude::*;
 use rand::Rng;
+use rand::prelude::SliceRandom;
 
 const ENEMY_RADIUS: f32 = 30.0;
 const EAT_RADIUS_PX: f32 = 80.0;
@@ -26,9 +28,14 @@ pub(super) fn plugin(app: &mut App) {
 
     app.add_systems(
         Update,
-        (tick_spawn, tick_bite_cooldowns).run_if(resource_exists::<EnemyAssets>),
+        (
+            tick_spawn,
+            tick_bite_cooldowns,
+            pursue_plants,
+            draw_eat_radius,
+        )
+            .run_if(resource_exists::<EnemyAssets>),
     );
-    app.add_systems(Update, (pursue_plants, draw_eat_radius));
 }
 
 pub fn enemy_spawner(transform: Transform, spawn_height: f32) -> impl Bundle {
@@ -72,6 +79,7 @@ pub struct EnemyAssets {
     rat_dead: Handle<Image>,
     rat_hit: Handle<Image>,
     rat_walk: Handle<Image>,
+    bite_sounds: Vec<Handle<AudioSource>>,
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Default, Reflect)]
@@ -120,6 +128,11 @@ impl FromWorld for EnemyAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+            bite_sounds: vec![
+                assets.load("audio/sound_effects/bite/bite1.ogg"),
+                assets.load("audio/sound_effects/bite/bite2.ogg"),
+                assets.load("audio/sound_effects/bite/bite3.ogg"),
+            ],
         }
     }
 }
@@ -168,6 +181,7 @@ fn pursue_plants(
     >,
     q_plants: Query<(Entity, &Transform), With<Plant>>,
     mut damage_plant_events: EventWriter<DamagePlantEvent>,
+    enemy_assets: Res<EnemyAssets>,
 ) {
     for (enemy, enemy_transform, mut enemy_velocity, optional_bite_cooldown) in q_enemies.iter_mut()
     {
@@ -210,6 +224,14 @@ fn pursue_plants(
                         BITE_COOLDOWN_S,
                         TimerMode::Once,
                     )));
+
+                // Play bite sound
+                let rng = &mut rand::thread_rng();
+                let random_bite_sound = enemy_assets.bite_sounds.choose(rng).unwrap().clone();
+                commands.spawn((
+                    sound_effect(random_bite_sound),
+                    Transform::from_translation(enemy_transform.translation),
+                ));
             }
         } else {
             // Move towards the plant
@@ -217,7 +239,6 @@ fn pursue_plants(
             *enemy_velocity = LinearVelocity(ENEMY_MOVE_SPEED * closest_plant_vector.xy());
         }
 
-        // TODO uncomment for when we want to eat plants
         // const ENEMY_VISION_RADIUS: f32 = 2000.;
         // let intersections = spatial_query.shape_intersections(
         //     &Collider::circle(ENEMY_VISION_RADIUS),
