@@ -1,10 +1,12 @@
 use crate::asset_tracking::LoadResource;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
+use bevy::input::keyboard::Key::GroupFirst;
 use bevy::prelude::*;
 use bevy_vector_shapes::painter::ShapePainter;
 use bevy_vector_shapes::prelude::*;
 
 const PLANT_RADIUS_PX: f32 = 30.;
+const DAISY_GROWTH_TIME_S: f32 = 3.;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Plant>();
@@ -15,6 +17,7 @@ pub(super) fn plugin(app: &mut App) {
     app.add_event::<SowPlantEvent>();
     app.add_systems(Update, sow_plants.run_if(resource_exists::<PlantAssets>));
     app.add_systems(Update, draw_plant_circles);
+    app.add_systems(Update, tick_growth);
 }
 
 fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
@@ -25,6 +28,7 @@ fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
             image: plant_assets.seedling.clone(),
             ..default()
         },
+        GrowthTimer(Timer::from_seconds(DAISY_GROWTH_TIME_S, TimerMode::Once)),
         Transform::from_translation(position.extend(1.)),
     )
 }
@@ -32,6 +36,10 @@ fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
 pub struct Plant; // TODO require a plant type
+
+#[derive(Component, Debug, Clone, PartialEq, Eq, Default, Reflect)]
+#[reflect(Component)]
+struct GrowthTimer(Timer);
 
 #[derive(Resource, Asset, Clone, Reflect)]
 #[reflect(Resource)]
@@ -110,5 +118,20 @@ fn draw_plant_circles(mut painter: ShapePainter, q_plants: Query<&Transform, Wit
         painter.hollow = true;
         painter.thickness = 0.5;
         painter.circle(PLANT_RADIUS_PX);
+    }
+}
+
+fn tick_growth(
+    mut commands: Commands,
+    mut q_growing_plants: Query<(Entity, &mut GrowthTimer)>,
+    time: Res<Time>,
+) {
+    for (entity, mut growth_timer) in &mut q_growing_plants {
+        growth_timer.0.tick(time.delta());
+        if growth_timer.0.finished() {
+            // TODO grow the plant
+            commands.entity(entity).remove::<GrowthTimer>();
+            println!("Plant {:?} finished growing", entity);
+        }
     }
 }
