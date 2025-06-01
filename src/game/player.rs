@@ -7,6 +7,9 @@ use bevy::{
     image::{ImageLoaderSettings, ImageSampler},
     prelude::*,
 };
+use bevy_vector_shapes::prelude::*;
+
+const PLAYER_THROW_RADIUS_PX: f32 = 120.;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Player>();
@@ -18,6 +21,8 @@ pub(super) fn plugin(app: &mut App) {
         Update,
         on_click.run_if(input_just_pressed(MouseButton::Left)),
     );
+
+    app.add_systems(Update, draw_player_circle);
 }
 
 /// The player character.
@@ -99,4 +104,13 @@ fn window_to_world(position: Vec2, window: &Window, camera: &Transform) -> Vec2 
 
     let world_pos_3d = *camera * norm;
     Vec2::new(world_pos_3d.x, world_pos_3d.y)
+}
+
+fn draw_player_circle(mut painter: ShapePainter, q_player: Query<&Transform, With<Player>>) {
+    if let Ok(player_pos) = q_player.single() {
+        painter.transform = *player_pos;
+        painter.hollow = true;
+        painter.thickness = 1.0;
+        painter.circle(PLAYER_THROW_RADIUS_PX);
+    }
 }
