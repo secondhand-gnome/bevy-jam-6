@@ -15,6 +15,7 @@
 - [ ] Enemies come from the right towards the nearest plant
 - [ ] Enemies inflict damage on plants by eating them
 - [ ] Plants die at 0 health
+- [ ] Touch screen support
 
 ## Milestone 3
 

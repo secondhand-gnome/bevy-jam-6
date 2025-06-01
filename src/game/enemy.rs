@@ -1,10 +1,12 @@
 //! Enemies eat plants.
 
 use crate::asset_tracking::LoadResource;
+use avian2d::prelude::{AngularVelocity, Collider, LinearVelocity, RigidBody};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use rand::Rng;
 
+const ENEMY_RADIUS: f32 = 30.0;
 const SPAWN_INTERVAL_S: f32 = 1.0;
 
 pub(super) fn plugin(app: &mut App) {
@@ -14,6 +16,9 @@ pub(super) fn plugin(app: &mut App) {
     app.load_resource::<EnemyAssets>();
 
     app.add_systems(Update, tick_spawn.run_if(resource_exists::<EnemyAssets>));
+
+    // TODO for enemies, find nearest plant using physics / colliders.
+    // Then walk towards it until close enough to eat it.
 }
 
 pub fn enemy_spawner(transform: Transform, spawn_height: f32) -> impl Bundle {
@@ -29,6 +34,9 @@ fn enemy(spawn_position: Vec3, enemy_assets: &EnemyAssets) -> impl Bundle {
     (
         Name::new("Enemy"),
         Enemy,
+        RigidBody::Kinematic,
+        Collider::circle(ENEMY_RADIUS),
+        LinearVelocity(Vec2::new(-10.0, 0.)), // TODO not this
         Sprite {
             image: enemy_assets.rat.clone(),
             ..default()

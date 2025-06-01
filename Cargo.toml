@@ -19,6 +19,7 @@ tracing = { version = "0.1", features = [
 ] }
 bevy-inspector-egui = "0.31.0"
 bevy_vector_shapes = "0.10.0"
+avian2d = "0.3.0"
 
 # Your web builds will start failing if you add a dependency that pulls in `getrandom` v0.3+.
 # To fix this, you should tell `getrandom` to use the `wasm_js` backend on Wasm.
