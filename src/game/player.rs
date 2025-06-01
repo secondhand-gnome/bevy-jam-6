@@ -9,7 +9,7 @@ use bevy::{
 };
 use bevy_vector_shapes::prelude::*;
 
-const PLAYER_THROW_RADIUS_PX: f32 = 120.;
+const PLAYER_THROW_RADIUS_PX: f32 = 240.;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Player>();
@@ -53,7 +53,7 @@ pub fn player(
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
-struct Player;
+pub struct Player;
 
 #[derive(Resource, Asset, Clone, Reflect)]
 #[reflect(Resource)]
@@ -64,6 +64,11 @@ pub struct PlayerAssets {
 
 #[derive(Event, Debug, Default)]
 pub struct PlayerClickEvent(pub Vec2);
+
+pub fn can_player_reach(player_position: Vec2, hit_position: Vec2) -> bool {
+    let difference = player_position - hit_position;
+    difference.length() < PLAYER_THROW_RADIUS_PX
+}
 
 impl FromWorld for PlayerAssets {
     fn from_world(world: &mut World) -> Self {

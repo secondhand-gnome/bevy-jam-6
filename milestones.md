@@ -4,7 +4,7 @@
 
 - [x] Stationary farmer in a house
 - [x] Grid of farm tiles outside the farmhouse
-- [ ] Throw a seed at a specific empty tile
+- [x] Throw a seed at a specific empty tile
 - [ ] Seedling grows when it lands on the tile
 - [ ] Seedling turns into a Daisy plant after 5 seconds
 

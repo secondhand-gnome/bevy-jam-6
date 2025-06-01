@@ -1,6 +1,6 @@
 use crate::asset_tracking::LoadResource;
 use crate::game::plant::{Plant, SowPlantEvent, plant_collision_check};
-use crate::game::player::PlayerClickEvent;
+use crate::game::player::{Player, PlayerClickEvent, can_player_reach};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy::sprite::SpriteImageMode::Tiled;
@@ -104,6 +104,7 @@ fn draw_outline(mut painter: ShapePainter, q_farm: Query<&Farm>) {
 fn on_player_click(
     mut click_events: EventReader<PlayerClickEvent>,
     mut sow_events: EventWriter<SowPlantEvent>,
+    q_player: Query<&Transform, With<Player>>,
     q_farm: Query<&Farm>,
     q_plants: Query<&Transform, With<Plant>>,
 ) {
@@ -112,6 +113,17 @@ fn on_player_click(
             let click_position = click_event.0;
 
             let mut can_sow = true;
+
+            if let Ok(player_transform) = q_player.single() {
+                let player_position = player_transform.translation.xy();
+                if !can_player_reach(player_position, click_position) {
+                    can_sow = false;
+                }
+                // TODO consider the gnomes
+            } else {
+                error!("No player found!");
+                return;
+            }
 
             for plant_transform in q_plants.iter() {
                 let plant_position = plant_transform.translation.xy();
