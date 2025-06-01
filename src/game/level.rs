@@ -40,7 +40,6 @@ pub fn spawn_level(
     barn_assets: Res<BarnAssets>,
     level_assets: Res<LevelAssets>,
     player_assets: Res<PlayerAssets>,
-    plant_assets: Res<PlantAssets>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     commands.spawn((
