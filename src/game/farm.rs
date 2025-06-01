@@ -1,5 +1,5 @@
 use crate::asset_tracking::LoadResource;
-use crate::game::plant::SowPlantEvent;
+use crate::game::plant::{Plant, SowPlantEvent, plant_collision_check};
 use crate::game::player::PlayerClickEvent;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
@@ -105,12 +105,33 @@ fn on_player_click(
     mut click_events: EventReader<PlayerClickEvent>,
     mut sow_events: EventWriter<SowPlantEvent>,
     q_farm: Query<&Farm>,
+    q_plants: Query<&Transform, With<Plant>>,
 ) {
     if q_farm.single().is_ok() {
         for click_event in click_events.read() {
-            // TODO check if we can actually plant here or not
-            let position = click_event.0;
-            sow_events.write(SowPlantEvent { position });
+            let click_position = click_event.0;
+
+            let mut can_sow = true;
+
+            for plant_transform in q_plants.iter() {
+                let plant_position = plant_transform.translation.xy();
+                if plant_collision_check(plant_position, click_position) {
+                    // Plant already here
+                    println!(
+                        "Can't plant at {:?} - plant already present at {:?}",
+                        click_position, plant_position
+                    );
+                    // TODO play a sound
+                    can_sow = false;
+                }
+            }
+
+            if can_sow {
+                // Actually sow a plant
+                sow_events.write(SowPlantEvent {
+                    position: click_position,
+                });
+            }
         }
     }
 }

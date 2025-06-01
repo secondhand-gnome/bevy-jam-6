@@ -31,7 +31,7 @@ fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
-struct Plant; // TODO require a plant type
+pub struct Plant; // TODO require a plant type
 
 #[derive(Resource, Asset, Clone, Reflect)]
 #[reflect(Resource)]
@@ -50,6 +50,11 @@ pub struct PlantAssets {
 pub struct SowPlantEvent {
     pub position: Vec2,
     // TODO plant type
+}
+
+pub fn plant_collision_check(plant_position: Vec2, hit_position: Vec2) -> bool {
+    let difference = plant_position - hit_position;
+    difference.length() < PLANT_RADIUS_PX * 2.
 }
 
 impl FromWorld for PlantAssets {
