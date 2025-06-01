@@ -1,8 +1,10 @@
 use crate::asset_tracking::LoadResource;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
+use bevy_vector_shapes::painter::ShapePainter;
+use bevy_vector_shapes::prelude::*;
 
-const PLANT_RADIUS: f32 = 30.;
+const PLANT_RADIUS_PX: f32 = 30.;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Plant>();
@@ -12,6 +14,7 @@ pub(super) fn plugin(app: &mut App) {
 
     app.add_event::<SowPlantEvent>();
     app.add_systems(Update, sow_plants.run_if(resource_exists::<PlantAssets>));
+    app.add_systems(Update, draw_plant_circles);
 }
 
 fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
@@ -93,5 +96,14 @@ fn sow_plants(
     for event in sow_events.read() {
         println!("Plant spawned at {:?}", event.position);
         commands.spawn(plant(event.position, &plant_assets));
+    }
+}
+
+fn draw_plant_circles(mut painter: ShapePainter, q_plants: Query<&Transform, With<Plant>>) {
+    for plant_pos in q_plants.iter() {
+        painter.transform = *plant_pos;
+        painter.hollow = true;
+        painter.thickness = 0.5;
+        painter.circle(PLANT_RADIUS_PX);
     }
 }

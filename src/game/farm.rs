@@ -94,6 +94,7 @@ impl FromWorld for FarmAssets {
 
 fn draw_outline(mut painter: ShapePainter, q_farm: Query<&Farm>) {
     if q_farm.single().is_ok() {
+        painter.transform = Transform::default();
         painter.hollow = true;
         painter.thickness = 0.5;
         painter.rect(FARM_SIZE_PX);
