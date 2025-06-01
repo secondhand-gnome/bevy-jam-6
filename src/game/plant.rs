@@ -69,6 +69,8 @@ pub struct PlantAssets {
     sow_sounds: Vec<Handle<AudioSource>>,
     #[dependency]
     growth_sound: Handle<AudioSource>,
+    #[dependency]
+    death_sound: Handle<AudioSource>,
 }
 
 #[derive(Event, Debug, Default)]
@@ -126,6 +128,7 @@ impl FromWorld for PlantAssets {
                 assets.load("audio/sound_effects/sow2.ogg"),
             ],
             growth_sound: assets.load("audio/sound_effects/growth.ogg"),
+            death_sound: assets.load("audio/sound_effects/death.ogg"),
         }
     }
 }

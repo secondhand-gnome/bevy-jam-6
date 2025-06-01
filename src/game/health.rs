@@ -1,9 +1,14 @@
+use crate::asset_tracking::LoadResource;
+use crate::audio::sound_effect;
 use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Health>();
 
-    app.add_systems(Update, remove_dead);
+    app.register_type::<HealthAssets>();
+    app.load_resource::<HealthAssets>();
+
+    app.add_systems(Update, remove_dead.run_if(resource_exists::<HealthAssets>));
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
@@ -11,6 +16,22 @@ pub(super) fn plugin(app: &mut App) {
 pub struct Health {
     current: i32,
     max: i32,
+}
+
+#[derive(Resource, Asset, Clone, Reflect)]
+#[reflect(Resource)]
+pub struct HealthAssets {
+    #[dependency]
+    death_sound: Handle<AudioSource>,
+}
+
+impl FromWorld for HealthAssets {
+    fn from_world(world: &mut World) -> Self {
+        let assets = world.resource::<AssetServer>();
+        Self {
+            death_sound: assets.load("audio/sound_effects/death.ogg"),
+        }
+    }
 }
 
 impl Health {
@@ -30,12 +51,23 @@ impl Health {
     }
 }
 
-fn remove_dead(mut commands: Commands, q_health: Query<(Entity, &Health)>) {
-    for (entity, health) in q_health {
+fn remove_dead(
+    mut commands: Commands,
+    q_health: Query<(Entity, &Health, &Transform)>,
+    health_assets: Res<HealthAssets>,
+) {
+    for (entity, health, transform) in q_health {
         if !health.is_alive() {
             info!("{:?} dies", entity);
-            // TODO spawn death animation and sound
             commands.entity(entity).despawn();
+
+            // Play sound
+            commands.spawn((
+                sound_effect(health_assets.death_sound.clone()),
+                Transform::from_translation(transform.translation),
+            ));
+
+            // TODO spawn particle effects
         }
     }
 }

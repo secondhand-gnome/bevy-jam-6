@@ -13,8 +13,8 @@
 - [x] Sounds for Milestone 1
 - [x] Timer displays next to seedling while it grows
 - [x] Enemies come from the right towards the nearest plant
-- [ ] Enemies inflict damage on plants by eating them
-- [ ] Plants die at 0 health
+- [x] Enemies inflict damage on plants by eating them
+- [x] Plants die at 0 health
 - [ ] Touch screen support
 
 ## Milestone 3
