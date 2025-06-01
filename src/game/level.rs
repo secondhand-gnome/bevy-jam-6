@@ -37,10 +37,10 @@ impl FromWorld for LevelAssets {
 pub fn spawn_level(
     mut commands: Commands,
     farm_assets: Res<FarmAssets>,
-    plant_assets: Res<PlantAssets>,
     barn_assets: Res<BarnAssets>,
     level_assets: Res<LevelAssets>,
     player_assets: Res<PlayerAssets>,
+    plant_assets: Res<PlantAssets>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     commands.spawn((

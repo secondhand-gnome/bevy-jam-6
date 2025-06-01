@@ -9,11 +9,26 @@ pub(super) fn plugin(app: &mut App) {
 
     app.register_type::<PlantAssets>();
     app.load_resource::<PlantAssets>();
+
+    app.add_event::<SowPlantEvent>();
+    app.add_systems(Update, sow_plants.run_if(resource_exists::<PlantAssets>));
+}
+
+fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
+    (
+        Name::new(format!("Plant at {:?}", position)),
+        Plant,
+        Sprite {
+            image: plant_assets.seedling.clone(),
+            ..default()
+        },
+        Transform::from_translation(position.extend(1.)),
+    )
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
-struct Plant;
+struct Plant; // TODO require a plant type
 
 #[derive(Resource, Asset, Clone, Reflect)]
 #[reflect(Resource)]
@@ -26,6 +41,12 @@ pub struct PlantAssets {
     pineapple: Handle<Image>,
     #[dependency]
     seedling: Handle<Image>,
+}
+
+#[derive(Event, Debug, Default)]
+pub struct SowPlantEvent {
+    pub position: Vec2,
+    // TODO plant type
 }
 
 impl FromWorld for PlantAssets {
@@ -61,5 +82,16 @@ impl FromWorld for PlantAssets {
                 },
             ),
         }
+    }
+}
+
+fn sow_plants(
+    mut commands: Commands,
+    plant_assets: Res<PlantAssets>,
+    mut sow_events: EventReader<SowPlantEvent>,
+) {
+    for event in sow_events.read() {
+        println!("Plant spawned at {:?}", event.position);
+        commands.spawn(plant(event.position, &plant_assets));
     }
 }

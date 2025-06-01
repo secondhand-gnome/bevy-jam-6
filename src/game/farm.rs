@@ -1,4 +1,5 @@
 use crate::asset_tracking::LoadResource;
+use crate::game::plant::SowPlantEvent;
 use crate::game::player::PlayerClickEvent;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
@@ -91,18 +92,24 @@ impl FromWorld for FarmAssets {
     }
 }
 
-fn draw_outline(mut painter: ShapePainter, mut q_farm: Query<&Farm>) {
-    if let Ok(farm) = q_farm.single() {
+fn draw_outline(mut painter: ShapePainter, q_farm: Query<&Farm>) {
+    if q_farm.single().is_ok() {
         painter.hollow = true;
         painter.thickness = 0.5;
         painter.rect(FARM_SIZE_PX);
     }
 }
 
-fn on_player_click(mut events: EventReader<PlayerClickEvent>, mut q_farm: Query<&Farm>) {
-    if let Ok(farm) = q_farm.single() {
-        for event in events.read() {
-            println!("TODO plant at {:?}", event.0);
+fn on_player_click(
+    mut click_events: EventReader<PlayerClickEvent>,
+    mut sow_events: EventWriter<SowPlantEvent>,
+    q_farm: Query<&Farm>,
+) {
+    if q_farm.single().is_ok() {
+        for click_event in click_events.read() {
+            // TODO check if we can actually plant here or not
+            let position = click_event.0;
+            sow_events.write(SowPlantEvent { position });
         }
     }
 }
