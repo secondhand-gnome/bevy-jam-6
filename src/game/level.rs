@@ -3,13 +3,13 @@
 use bevy::prelude::*;
 
 use crate::game::barn::{BarnAssets, barn};
+use crate::game::farm::{FarmAssets, farm};
 use crate::{
     asset_tracking::LoadResource,
     audio::music,
     game::player::{PlayerAssets, player},
     screens::Screen,
 };
-use crate::game::farm::{farm, FarmAssets};
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<LevelAssets>();

@@ -124,11 +124,11 @@ fn draw_plant_circles(mut painter: ShapePainter, q_plants: Query<&Transform, Wit
 
 fn tick_growth(
     mut commands: Commands,
-    mut q_growing_plants: Query<(Entity, &mut Transform, &mut Sprite, &mut GrowthTimer)>,
+    mut q_growing_plants: Query<(Entity, &mut Transform, &mut GrowthTimer)>,
     time: Res<Time>,
     plant_assets: Res<PlantAssets>,
 ) {
-    for (entity, mut transform, mut sprite, mut growth_timer) in &mut q_growing_plants {
+    for (entity, mut transform, mut growth_timer) in &mut q_growing_plants {
         growth_timer.0.tick(time.delta());
         if growth_timer.0.finished() {
             commands
