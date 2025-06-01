@@ -1,11 +1,12 @@
 //! Player-specific behavior.
 
+use crate::{asset_tracking::LoadResource};
+use bevy::input::common_conditions::*;
+use bevy::window::PrimaryWindow;
 use bevy::{
     image::{ImageLoaderSettings, ImageSampler},
     prelude::*,
 };
-
-use crate::{AppSystems, PausableSystems, asset_tracking::LoadResource};
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Player>();
@@ -13,7 +14,10 @@ pub(super) fn plugin(app: &mut App) {
     app.register_type::<PlayerAssets>();
     app.load_resource::<PlayerAssets>();
 
-    // TODO listen to input
+    app.add_systems(
+        Update,
+        on_click.run_if(input_just_pressed(MouseButton::Left)),
+    );
 }
 
 /// The player character.
@@ -64,6 +68,14 @@ impl FromWorld for PlayerAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+        }
+    }
+}
+
+fn on_click(q_windows: Query<&Window, With<PrimaryWindow>>) {
+    if let Ok(window) = q_windows.single() {
+        if let Some(position) = window.cursor_position() {
+            println!("Click at {:?}", position);
         }
     }
 }
