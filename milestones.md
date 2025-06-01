@@ -10,7 +10,7 @@
 
 ## Milestone 2
 
-- [ ] Sounds for Milestone 1
+- [x] Sounds for Milestone 1
 - [ ] Timer displays next to seedling while it grows
 - [ ] Enemies come from the right towards the nearest plant
 - [ ] Enemies inflict damage on plants by eating them

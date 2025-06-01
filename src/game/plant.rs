@@ -57,6 +57,8 @@ pub struct PlantAssets {
     seedling: Handle<Image>,
     #[dependency]
     sow_sounds: Vec<Handle<AudioSource>>,
+    #[dependency]
+    growth_sound: Handle<AudioSource>,
 }
 
 #[derive(Event, Debug, Default)]
@@ -106,6 +108,7 @@ impl FromWorld for PlantAssets {
                 assets.load("audio/sound_effects/sow1.ogg"),
                 assets.load("audio/sound_effects/sow2.ogg"),
             ],
+            growth_sound: assets.load("audio/sound_effects/growth.ogg"),
         }
     }
 }
@@ -158,6 +161,11 @@ fn tick_growth(
 
             // TODO check plant type
             transform.scale = Vec3::splat(0.5);
+
+            commands.spawn((
+                sound_effect(plant_assets.growth_sound.clone()),
+                Transform::from_translation(transform.translation),
+            ));
 
             println!("Plant {:?} finished growing", entity);
         }
