@@ -4,6 +4,7 @@ mod farm;
 pub mod level;
 mod plant;
 pub mod player;
+mod physics;
 
 use crate::game::player::{PlayerClickEvent, ThrowSeedEvent};
 use avian2d::PhysicsPlugins;

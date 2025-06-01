@@ -1,6 +1,8 @@
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
+use crate::game::physics::GameLayer;
 use crate::theme::palette::{PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
+use avian2d::prelude::{Collider, CollisionLayers, RigidBody};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy_vector_shapes::painter::ShapePainter;
@@ -28,6 +30,9 @@ fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
     (
         Name::new(format!("Plant at {:?}", position)),
         Plant,
+        RigidBody::Static,
+        Collider::circle(PLANT_RADIUS_PX),
+        CollisionLayers::new([GameLayer::Plant], [GameLayer::Plant, GameLayer::Enemy]),
         Sprite {
             image: plant_assets.seedling.clone(),
             ..default()
@@ -186,7 +191,10 @@ fn tick_growth(
             let progress = growth_timer.0.fraction();
             painter.hollow = false;
             painter.color = PLANT_GROWTH_FOREGROUND;
-            painter.rect(Vec2::new(PROGRESS_DIMENS.x * progress, PROGRESS_DIMENS.y * 0.8));
+            painter.rect(Vec2::new(
+                PROGRESS_DIMENS.x * progress,
+                PROGRESS_DIMENS.y * 0.8,
+            ));
         }
     }
 }
