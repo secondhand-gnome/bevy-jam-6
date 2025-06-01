@@ -113,6 +113,7 @@ fn on_click(
     q_transform: Query<&Transform, With<Camera>>,
     mut events: EventWriter<PlayerClickEvent>,
 ) {
+    // TODO ignore if paused
     if let Ok(window) = q_windows.single() {
         if let Ok(transform) = q_transform.single() {
             if let Some(window_position) = window.cursor_position() {

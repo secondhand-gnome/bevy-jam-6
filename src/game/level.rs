@@ -53,7 +53,7 @@ pub fn spawn_level(
             (
                 Name::new("Gameplay Music"),
                 music(level_assets.music.clone())
-            )
+            ),
         ],
     ));
 }

@@ -1,4 +1,5 @@
 use crate::asset_tracking::LoadResource;
+use crate::game::enemy::enemy_spawner;
 use crate::game::plant::{Plant, SowPlantEvent, plant_collision_check};
 use crate::game::player::{Player, PlayerClickEvent, ThrowSeedEvent, can_player_reach};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
@@ -36,6 +37,11 @@ pub fn farm(farm_assets: &FarmAssets) -> impl Bundle {
             ..default()
         },
         Transform::from_scale(FARM_SIZE_TILES.extend(1.)),
+        children![enemy_spawner(Transform::from_translation(Vec3::new(
+            FARM_SIZE_PX.x * 0.9,
+            0.,
+            0.
+        )))],
     )
 }
 
