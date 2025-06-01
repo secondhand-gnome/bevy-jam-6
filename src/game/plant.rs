@@ -1,6 +1,5 @@
 use crate::asset_tracking::LoadResource;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
-use bevy::input::keyboard::Key::GroupFirst;
 use bevy::prelude::*;
 use bevy_vector_shapes::painter::ShapePainter;
 use bevy_vector_shapes::prelude::*;
@@ -15,9 +14,11 @@ pub(super) fn plugin(app: &mut App) {
     app.load_resource::<PlantAssets>();
 
     app.add_event::<SowPlantEvent>();
-    app.add_systems(Update, sow_plants.run_if(resource_exists::<PlantAssets>));
+    app.add_systems(
+        Update,
+        (sow_plants, tick_growth).run_if(resource_exists::<PlantAssets>),
+    );
     app.add_systems(Update, draw_plant_circles);
-    app.add_systems(Update, tick_growth);
 }
 
 fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
@@ -125,12 +126,20 @@ fn tick_growth(
     mut commands: Commands,
     mut q_growing_plants: Query<(Entity, &mut GrowthTimer)>,
     time: Res<Time>,
+    plant_assets: Res<PlantAssets>,
 ) {
     for (entity, mut growth_timer) in &mut q_growing_plants {
         growth_timer.0.tick(time.delta());
         if growth_timer.0.finished() {
-            // TODO grow the plant
             commands.entity(entity).remove::<GrowthTimer>();
+            commands.entity(entity).remove::<Sprite>();
+
+            // TODO check plant type
+            commands.entity(entity).insert(Sprite {
+                image: plant_assets.daisy.clone(),
+                ..default()
+            });
+
             println!("Plant {:?} finished growing", entity);
         }
     }
