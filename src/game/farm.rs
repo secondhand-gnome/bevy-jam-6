@@ -1,6 +1,7 @@
 use crate::asset_tracking::LoadResource;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
+use bevy::sprite::SpriteImageMode::Tiled;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Farm>();
@@ -13,7 +14,16 @@ pub fn farm(farm_assets: &FarmAssets) -> impl Bundle {
     (
         Name::new("Farm"),
         Farm,
-        // TODO Tile map
+        Sprite {
+            image: farm_assets.grass_a.clone(),
+            image_mode: Tiled {
+                tile_x: true,
+                tile_y: true,
+                stretch_value: 0.1,
+            },
+            ..default()
+        },
+        Transform::from_scale(Vec3::new(10., 10., 10.)),
     )
 }
 
