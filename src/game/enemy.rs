@@ -14,6 +14,7 @@ use rand::Rng;
 const ENEMY_RADIUS: f32 = 30.0;
 const SPAWN_INTERVAL_S: f32 = 1.0;
 const ENEMY_MOVE_SPEED: f32 = 0.5;
+const ENEMY_SPAWN_LIMIT: usize = 10;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Enemy>();
@@ -116,6 +117,7 @@ impl FromWorld for EnemyAssets {
 fn tick_spawn(
     mut commands: Commands,
     q_enemy_spawners: Query<(&Transform, &mut SpawnTimer, &EnemySpawner)>,
+    q_enemies: Query<&Enemy>,
     time: Res<Time>,
     enemy_assets: Res<EnemyAssets>,
 ) {
@@ -123,13 +125,18 @@ fn tick_spawn(
         spawn_timer.0.tick(time.delta());
 
         if spawn_timer.0.just_finished() {
+            if q_enemies.iter().len() > ENEMY_SPAWN_LIMIT {
+                info!("Not spawning an enemy - limit reached");
+                return;
+            }
+
             let rng = &mut rand::thread_rng();
             let rand_f32: f32 = rng.r#gen();
             let y_offset = (rand_f32 - 0.5) * enemy_spawner.spawn_height;
             let mut spawn_position = transform.translation;
             spawn_position.y += y_offset;
 
-            println!(
+            info!(
                 "Spawning an enemy at {:?}",
                 transform.translation + spawn_position
             );
