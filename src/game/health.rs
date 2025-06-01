@@ -1,5 +1,6 @@
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
+use crate::theme::palette::{HEALTH_HIGH, HEALTH_LOW, HEALTH_MED};
 use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
@@ -44,6 +45,22 @@ impl Health {
 
     pub fn reduce(&mut self, amount: i32) {
         self.current = std::cmp::max(0, self.current - amount);
+    }
+
+    /// Return the fraction of remaining health from 0.0 to 1.0
+    pub fn fraction(&self) -> f32 {
+        (self.current as f32) / (self.max as f32)
+    }
+
+    pub fn bar_color(&self) -> Color {
+        let frac = self.fraction();
+        if frac < 0.25 {
+            HEALTH_LOW
+        } else if frac < 0.6 {
+            HEALTH_MED
+        } else {
+            HEALTH_HIGH
+        }
     }
 
     fn is_alive(&self) -> bool {

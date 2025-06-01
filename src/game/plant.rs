@@ -2,7 +2,7 @@ use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
-use crate::theme::palette::{PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
+use crate::theme::palette::{PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE, PLANT_HEALTH_OUTLINE};
 use avian2d::prelude::{Collider, CollisionLayers, RigidBody};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
@@ -26,7 +26,7 @@ pub(super) fn plugin(app: &mut App) {
         Update,
         (sow_plants, tick_growth, damage_plants).run_if(resource_exists::<PlantAssets>),
     );
-    app.add_systems(Update, draw_plant_circles);
+    app.add_systems(Update, (draw_plant_circles, draw_health));
 }
 
 fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
@@ -158,6 +158,29 @@ fn draw_plant_circles(mut painter: ShapePainter, q_plants: Query<&Transform, Wit
     for plant_transform in q_plants {
         painter.transform.translation = plant_transform.translation;
         painter.circle(PLANT_RADIUS_PX);
+    }
+}
+
+fn draw_health(mut painter: ShapePainter, q_plants: Query<(&Transform, &Health), With<Plant>>) {
+    const HEALTH_HEIGHT_PX: f32 = PLANT_RADIUS_PX * 0.2;
+    const HEALTH_LENGTH_PX: f32 = PLANT_RADIUS_PX * 1.;
+    const HEALTH_DIMENS: Vec2 = Vec2::new(HEALTH_LENGTH_PX, HEALTH_HEIGHT_PX);
+    const HEALTH_OFFSET: Vec3 = Vec3::new(0., 1.1 * PLANT_RADIUS_PX, 0.);
+
+    for (transform, health) in q_plants {
+        // Draw the remaining health
+        painter.transform.translation = transform.translation + HEALTH_OFFSET;
+        painter.hollow = true;
+        painter.thickness = 0.5;
+        painter.color = PLANT_HEALTH_OUTLINE;
+        painter.rect(HEALTH_DIMENS);
+
+        painter.hollow = false;
+        painter.color = health.bar_color();
+        painter.rect(Vec2::new(
+            HEALTH_DIMENS.x * health.fraction(),
+            HEALTH_DIMENS.y * 0.8,
+        ));
     }
 }
 
