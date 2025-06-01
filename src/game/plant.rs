@@ -19,9 +19,10 @@ pub(super) fn plugin(app: &mut App) {
     app.load_resource::<PlantAssets>();
 
     app.add_event::<SowPlantEvent>();
+    app.add_event::<DamagePlantEvent>();
     app.add_systems(
         Update,
-        (sow_plants, tick_growth).run_if(resource_exists::<PlantAssets>),
+        (sow_plants, tick_growth, damage_plants).run_if(resource_exists::<PlantAssets>),
     );
     app.add_systems(Update, draw_plant_circles);
 }
@@ -71,6 +72,12 @@ pub struct PlantAssets {
 pub struct SowPlantEvent {
     pub position: Vec2,
     // TODO plant type
+}
+
+#[derive(Event, Debug)]
+pub struct DamagePlantEvent {
+    pub plant_entity: Entity,
+    pub amount: i32,
 }
 
 pub fn plant_collision_check(plant_position: Vec2, hit_position: Vec2) -> bool {
@@ -196,6 +203,19 @@ fn tick_growth(
                 PROGRESS_DIMENS.x * progress,
                 PROGRESS_DIMENS.y * 0.8,
             ));
+        }
+    }
+}
+
+fn damage_plants(
+    q_plants: Query<(Entity), With<Plant>>, // TODO plant health
+    mut damage_plant_events: EventReader<DamagePlantEvent>,
+) {
+    for ev in damage_plant_events.read() {
+        for plant_entity in q_plants {
+            if plant_entity == ev.plant_entity {
+                info!("Damage plant {:?} for {}", plant_entity, ev.amount);
+            }
         }
     }
 }

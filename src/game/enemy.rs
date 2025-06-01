@@ -2,7 +2,7 @@
 
 use crate::asset_tracking::LoadResource;
 use crate::game::physics::GameLayer;
-use crate::game::plant::Plant;
+use crate::game::plant::{DamagePlantEvent, Plant};
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
 use avian2d::prelude::*;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
@@ -16,6 +16,7 @@ const SPAWN_INTERVAL_S: f32 = 1.0;
 const ENEMY_MOVE_SPEED: f32 = 0.5;
 const ENEMY_SPAWN_LIMIT: usize = 10;
 const BITE_COOLDOWN_S: f32 = 2.5;
+const BITE_STRENGTH: i32 = 1;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Enemy>();
@@ -165,7 +166,8 @@ fn pursue_plants(
         ),
         With<Enemy>,
     >,
-    q_plants: Query<(Entity, &Transform), With<Plant>>, // TODO plantHealth
+    q_plants: Query<(Entity, &Transform), With<Plant>>,
+    mut damage_plant_events: EventWriter<DamagePlantEvent>,
 ) {
     for (enemy, enemy_transform, mut enemy_velocity, optional_bite_cooldown) in q_enemies.iter_mut()
     {
@@ -196,6 +198,11 @@ fn pursue_plants(
             } else {
                 // Bite
                 info!("Bite plant {:?}", closest_plant);
+
+                damage_plant_events.write(DamagePlantEvent {
+                    plant_entity: *closest_plant,
+                    amount: BITE_STRENGTH,
+                });
 
                 commands
                     .entity(enemy)
