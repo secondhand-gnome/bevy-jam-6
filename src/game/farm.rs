@@ -1,5 +1,5 @@
 use crate::asset_tracking::LoadResource;
-use bevy::color::palettes::css::*;
+use crate::game::player::PlayerClickEvent;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy::sprite::SpriteImageMode::Tiled;
@@ -18,6 +18,7 @@ pub(super) fn plugin(app: &mut App) {
     app.register_type::<FarmAssets>();
     app.load_resource::<FarmAssets>();
     app.add_systems(Update, draw_outline);
+    app.add_systems(Update, on_player_click);
 }
 
 pub fn farm(farm_assets: &FarmAssets) -> impl Bundle {
@@ -33,7 +34,7 @@ pub fn farm(farm_assets: &FarmAssets) -> impl Bundle {
             },
             ..default()
         },
-        Transform::from_scale(FARM_SIZE_TILES.extend(1.))
+        Transform::from_scale(FARM_SIZE_TILES.extend(1.)),
     )
 }
 
@@ -52,7 +53,6 @@ pub struct FarmAssets {
     dirt_a: Handle<Image>,
     #[dependency]
     dirt_b: Handle<Image>,
-    // TODO plants
 }
 
 impl FromWorld for FarmAssets {
@@ -91,8 +91,18 @@ impl FromWorld for FarmAssets {
     }
 }
 
-fn draw_outline(mut painter: ShapePainter) {
-    painter.hollow = true;
-    painter.thickness = 0.5;
-    painter.rect(FARM_SIZE_PX);
+fn draw_outline(mut painter: ShapePainter, mut q_farm: Query<&Farm>) {
+    if let Ok(farm) = q_farm.single() {
+        painter.hollow = true;
+        painter.thickness = 0.5;
+        painter.rect(FARM_SIZE_PX);
+    }
+}
+
+fn on_player_click(mut events: EventReader<PlayerClickEvent>, mut q_farm: Query<&Farm>) {
+    if let Ok(farm) = q_farm.single() {
+        for event in events.read() {
+            println!("TODO plant at {:?}", event.0);
+        }
+    }
 }

@@ -10,6 +10,7 @@ use crate::{
     screens::Screen,
 };
 use crate::game::farm::{farm, FarmAssets};
+use crate::game::plant::PlantAssets;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<LevelAssets>();
@@ -36,6 +37,7 @@ impl FromWorld for LevelAssets {
 pub fn spawn_level(
     mut commands: Commands,
     farm_assets: Res<FarmAssets>,
+    plant_assets: Res<PlantAssets>,
     barn_assets: Res<BarnAssets>,
     level_assets: Res<LevelAssets>,
     player_assets: Res<PlayerAssets>,

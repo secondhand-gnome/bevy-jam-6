@@ -1,6 +1,6 @@
 //! Player-specific behavior.
 
-use crate::{asset_tracking::LoadResource};
+use crate::asset_tracking::LoadResource;
 use bevy::input::common_conditions::*;
 use bevy::window::PrimaryWindow;
 use bevy::{
@@ -57,6 +57,9 @@ pub struct PlayerAssets {
     farmer: Handle<Image>,
 }
 
+#[derive(Event, Debug, Default)]
+pub struct PlayerClickEvent(pub Vec2);
+
 impl FromWorld for PlayerAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
@@ -72,10 +75,13 @@ impl FromWorld for PlayerAssets {
     }
 }
 
-fn on_click(q_windows: Query<&Window, With<PrimaryWindow>>) {
+fn on_click(
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+    mut events: EventWriter<PlayerClickEvent>,
+) {
     if let Ok(window) = q_windows.single() {
         if let Some(position) = window.cursor_position() {
-            println!("Click at {:?}", position);
+            events.write(PlayerClickEvent(position));
         }
     }
 }
