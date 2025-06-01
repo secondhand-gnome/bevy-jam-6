@@ -3,18 +3,19 @@
 use crate::asset_tracking::LoadResource;
 use crate::game::physics::GameLayer;
 use crate::game::plant::Plant;
-use avian2d::prelude::Collider;
-use avian2d::prelude::CollisionLayers;
-use avian2d::prelude::LinearVelocity;
-use avian2d::prelude::RigidBody;
+use crate::theme::palette::ENEMY_EAT_OUTLINE;
+use avian2d::prelude::*;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
+use bevy_vector_shapes::prelude::*;
 use rand::Rng;
 
 const ENEMY_RADIUS: f32 = 30.0;
+const EAT_RADIUS_PX: f32 = 80.0;
 const SPAWN_INTERVAL_S: f32 = 1.0;
 const ENEMY_MOVE_SPEED: f32 = 0.5;
 const ENEMY_SPAWN_LIMIT: usize = 10;
+const BITE_COOLDOWN_S: f32 = 2.5;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Enemy>();
@@ -22,11 +23,11 @@ pub(super) fn plugin(app: &mut App) {
     app.register_type::<EnemyAssets>();
     app.load_resource::<EnemyAssets>();
 
-    app.add_systems(Update, tick_spawn.run_if(resource_exists::<EnemyAssets>));
-    app.add_systems(Update, pursue_plants);
-
-    // TODO for enemies, find nearest plant using physics / colliders.
-    // Then walk towards it until close enough to eat it.
+    app.add_systems(
+        Update,
+        (tick_spawn, tick_bite_cooldowns).run_if(resource_exists::<EnemyAssets>),
+    );
+    app.add_systems(Update, (pursue_plants, draw_eat_radius));
 }
 
 pub fn enemy_spawner(transform: Transform, spawn_height: f32) -> impl Bundle {
@@ -45,12 +46,16 @@ fn enemy(spawn_position: Vec3, enemy_assets: &EnemyAssets) -> impl Bundle {
         RigidBody::Kinematic,
         Collider::circle(ENEMY_RADIUS),
         CollisionLayers::new([GameLayer::Enemy], [GameLayer::Plant, GameLayer::Enemy]),
-        LinearVelocity(Vec2::new(-10.0, 0.)), // TODO not this
         Sprite {
             image: enemy_assets.rat.clone(),
             ..default()
         },
         Transform::from_translation(spawn_position),
+        children![(
+            Name::new("Enemy eat collider"),
+            Collider::circle(EAT_RADIUS_PX),
+            CollisionLayers::new(LayerMask::NONE, [GameLayer::Plant]),
+        )],
     )
 }
 
@@ -77,6 +82,10 @@ struct EnemySpawner {
 #[derive(Component, Debug, Clone, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
 struct SpawnTimer(Timer);
+
+#[derive(Component, Debug, Clone, PartialEq, Eq, Default, Reflect)]
+#[reflect(Component)]
+struct BiteCooldown(Timer);
 
 impl FromWorld for EnemyAssets {
     fn from_world(world: &mut World) -> Self {
@@ -146,28 +155,60 @@ fn tick_spawn(
 }
 
 fn pursue_plants(
-    // commands: Commands,
-    mut q_enemies: Query<(&Transform, &mut LinearVelocity), With<Enemy>>,
-    q_plants: Query<&Transform, With<Plant>>,
-    // spatial_query: SpatialQuery,
+    mut commands: Commands,
+    mut q_enemies: Query<
+        (
+            Entity,
+            &Transform,
+            &mut LinearVelocity,
+            Option<&BiteCooldown>,
+        ),
+        With<Enemy>,
+    >,
+    q_plants: Query<(Entity, &Transform), With<Plant>>, // TODO plantHealth
 ) {
-    // TODO use navmesh / A* pathfinding instead of a straight line
-    for (enemy_transform, mut enemy_velocity) in q_enemies.iter_mut() {
+    for (enemy, enemy_transform, mut enemy_velocity, optional_bite_cooldown) in q_enemies.iter_mut()
+    {
         if q_plants.is_empty() {
             // No plants - hold still
             *enemy_velocity = LinearVelocity(Vec2::ZERO);
             continue;
         }
 
-        let mut vectors_toward_plants: Vec<_> = q_plants
+        let mut plant_vectors: Vec<_> = q_plants
             .iter()
-            .map(|plant_transform| plant_transform.translation - enemy_transform.translation)
+            .map(|(plant, plant_transform)| {
+                (
+                    plant,
+                    plant_transform.translation - enemy_transform.translation,
+                )
+            })
             .collect();
 
         // Sort plants by distance from this enemy
-        vectors_toward_plants.sort_by(|a, b| a.length().partial_cmp(&b.length()).unwrap());
-        let closest_plant_vector = vectors_toward_plants.first().unwrap();
-        *enemy_velocity = LinearVelocity(ENEMY_MOVE_SPEED * closest_plant_vector.xy());
+        plant_vectors.sort_by(|a, b| a.1.length().partial_cmp(&b.1.length()).unwrap());
+        let (closest_plant, closest_plant_vector) = plant_vectors.first().unwrap();
+
+        if closest_plant_vector.length() < EAT_RADIUS_PX {
+            // Eat the plant
+            if optional_bite_cooldown.is_some() {
+                // In cooldown - cannot bite
+            } else {
+                // Bite
+                info!("Bite plant {:?}", closest_plant);
+
+                commands
+                    .entity(enemy)
+                    .insert(BiteCooldown(Timer::from_seconds(
+                        BITE_COOLDOWN_S,
+                        TimerMode::Once,
+                    )));
+            }
+        } else {
+            // Move towards the plant
+            // TODO use A* pathfinding here
+            *enemy_velocity = LinearVelocity(ENEMY_MOVE_SPEED * closest_plant_vector.xy());
+        }
 
         // TODO uncomment for when we want to eat plants
         // const ENEMY_VISION_RADIUS: f32 = 2000.;
@@ -177,5 +218,29 @@ fn pursue_plants(
         //     0.,
         //     &SpatialQueryFilter::from_mask(GameLayer::Plant.to_bits()),
         // );
+    }
+}
+
+fn draw_eat_radius(mut painter: ShapePainter, q_enemies: Query<&Transform, With<Enemy>>) {
+    painter.hollow = true;
+    painter.thickness = 0.25;
+    painter.color = ENEMY_EAT_OUTLINE;
+    for enemy_transform in q_enemies {
+        painter.transform.translation = enemy_transform.translation;
+        painter.circle(EAT_RADIUS_PX);
+    }
+}
+
+fn tick_bite_cooldowns(
+    mut commands: Commands,
+    mut q_bite_cooldowns: Query<(Entity, &mut BiteCooldown)>,
+    time: Res<Time>,
+) {
+    for (entity, mut cooldown) in &mut q_bite_cooldowns {
+        cooldown.0.tick(time.delta());
+
+        if cooldown.0.finished() {
+            commands.entity(entity).remove::<BiteCooldown>();
+        }
     }
 }

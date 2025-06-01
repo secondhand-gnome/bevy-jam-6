@@ -19,3 +19,6 @@ pub const BUTTON_PRESSED_BACKGROUND: Color = Color::srgb(0.239, 0.286, 0.600);
 pub const PLANT_GROWTH_OUTLINE: Color = Color::srgb(0.051, 0.302, 0.282);
 /// #96f5d9
 pub const PLANT_GROWTH_FOREGROUND: Color = Color::srgb(0.588, 0.961, 0.851);
+
+/// #db410e
+pub const ENEMY_EAT_OUTLINE: Color = Color::srgb(0.859, 0.255, 0.055);

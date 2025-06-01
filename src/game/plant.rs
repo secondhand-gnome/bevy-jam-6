@@ -138,10 +138,11 @@ fn sow_plants(
 }
 
 fn draw_plant_circles(mut painter: ShapePainter, q_plants: Query<&Transform, With<Plant>>) {
-    for plant_transform in q_plants.iter() {
+    painter.color = PLANT_GROWTH_OUTLINE;
+    painter.hollow = true;
+    painter.thickness = 0.5;
+    for plant_transform in q_plants {
         painter.transform.translation = plant_transform.translation;
-        painter.hollow = true;
-        painter.thickness = 0.5;
         painter.circle(PLANT_RADIUS_PX);
     }
 }
