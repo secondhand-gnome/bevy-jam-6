@@ -10,7 +10,6 @@ use crate::{
     screens::Screen,
 };
 use crate::game::farm::{farm, FarmAssets};
-use crate::game::plant::PlantAssets;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<LevelAssets>();

@@ -13,7 +13,7 @@ mod screens;
 mod theme;
 
 use bevy::{asset::AssetMetaCheck, prelude::*};
-use bevy_vector_shapes::{Shape2dPlugin, ShapePlugin};
+use bevy_vector_shapes::Shape2dPlugin;
 
 fn main() -> AppExit {
     App::new().add_plugins(AppPlugin).run()
