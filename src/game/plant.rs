@@ -1,5 +1,6 @@
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
+use crate::game::health::Health;
 use crate::game::physics::GameLayer;
 use crate::theme::palette::{PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
 use avian2d::prelude::{Collider, CollisionLayers, RigidBody};
@@ -11,6 +12,7 @@ use rand::prelude::SliceRandom;
 
 const PLANT_RADIUS_PX: f32 = 30.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
+const PLANT_MAX_HEALTH: i32 = 5; // TODO depends on plant type
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Plant>();
@@ -39,6 +41,7 @@ fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
             ..default()
         },
         GrowthTimer(Timer::from_seconds(DAISY_GROWTH_TIME_S, TimerMode::Once)),
+        Health::new(PLANT_MAX_HEALTH),
         Transform::from_translation(position.extend(1.)),
     )
 }
@@ -74,6 +77,7 @@ pub struct SowPlantEvent {
     // TODO plant type
 }
 
+// TODO generalize for enemies as well
 #[derive(Event, Debug)]
 pub struct DamagePlantEvent {
     pub plant_entity: Entity,
@@ -208,12 +212,13 @@ fn tick_growth(
 }
 
 fn damage_plants(
-    q_plants: Query<(Entity), With<Plant>>, // TODO plant health
+    mut q_plants: Query<(Entity, &mut Health), With<Plant>>, // TODO plant health
     mut damage_plant_events: EventReader<DamagePlantEvent>,
 ) {
     for ev in damage_plant_events.read() {
-        for plant_entity in q_plants {
+        for (plant_entity, mut plant_health) in q_plants.iter_mut() {
             if plant_entity == ev.plant_entity {
+                plant_health.reduce(ev.amount);
                 info!("Damage plant {:?} for {}", plant_entity, ev.amount);
             }
         }

@@ -5,6 +5,7 @@ pub mod level;
 mod physics;
 mod plant;
 pub mod player;
+mod health;
 
 use crate::game::player::{PlayerClickEvent, ThrowSeedEvent};
 use avian2d::PhysicsPlugins;
@@ -17,6 +18,7 @@ pub(super) fn plugin(app: &mut App) {
     app.add_plugins(PhysicsPlugins::default());
 
     app.add_plugins((
+        health::plugin,
         plant::plugin,
         enemy::plugin,
         farm::plugin,
