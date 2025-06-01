@@ -26,6 +26,7 @@ pub(super) fn plugin(app: &mut App) {
             .run_if(input_just_pressed(MouseButton::Left))
             .in_set(PausableSystems),
     );
+    app.add_systems(Update, check_touch.in_set(PausableSystems));
 
     app.add_systems(
         Update,
@@ -116,10 +117,25 @@ fn on_click(
     q_transform: Query<&Transform, With<Camera>>,
     mut events: EventWriter<PlayerClickEvent>,
 ) {
-    // TODO ignore if paused
     if let Ok(window) = q_windows.single() {
         if let Ok(transform) = q_transform.single() {
             if let Some(window_position) = window.cursor_position() {
+                let world_position = window_to_world(window_position, window, transform);
+                events.write(PlayerClickEvent(world_position));
+            }
+        }
+    }
+}
+
+fn check_touch(
+    touches: Res<Touches>,
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+    q_transform: Query<&Transform, With<Camera>>,
+    mut events: EventWriter<PlayerClickEvent>,
+) {
+    if let Some(window_position) = touches.first_pressed_position() {
+        if let Ok(window) = q_windows.single() {
+            if let Ok(transform) = q_transform.single() {
                 let world_position = window_to_world(window_position, window, transform);
                 events.write(PlayerClickEvent(world_position));
             }
