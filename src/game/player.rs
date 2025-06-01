@@ -77,11 +77,26 @@ impl FromWorld for PlayerAssets {
 
 fn on_click(
     q_windows: Query<&Window, With<PrimaryWindow>>,
+    q_transform: Query<&Transform, With<Camera>>,
     mut events: EventWriter<PlayerClickEvent>,
 ) {
     if let Ok(window) = q_windows.single() {
-        if let Some(position) = window.cursor_position() {
-            events.write(PlayerClickEvent(position));
+        if let Ok(transform) = q_transform.single() {
+            if let Some(window_position) = window.cursor_position() {
+                let world_position = window_to_world(window_position, window, transform);
+                events.write(PlayerClickEvent(world_position));
+            }
         }
     }
+}
+
+fn window_to_world(position: Vec2, window: &Window, camera: &Transform) -> Vec2 {
+    let norm = Vec3::new(
+        position.x - window.width() / 2.,
+        -1. * (position.y - window.height() / 2.),
+        0.,
+    );
+
+    let world_pos_3d = *camera * norm;
+    Vec2::new(world_pos_3d.x, world_pos_3d.y)
 }
