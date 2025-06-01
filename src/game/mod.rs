@@ -4,11 +4,12 @@ pub mod level;
 mod plant;
 pub mod player;
 
-use crate::game::player::PlayerClickEvent;
+use crate::game::player::{PlayerClickEvent, ThrowSeedEvent};
 use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<PlayerClickEvent>();
+    app.add_event::<ThrowSeedEvent>();
 
     app.add_plugins((
         plant::plugin,

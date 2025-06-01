@@ -1,6 +1,6 @@
 use crate::asset_tracking::LoadResource;
 use crate::game::plant::{Plant, SowPlantEvent, plant_collision_check};
-use crate::game::player::{Player, PlayerClickEvent, can_player_reach};
+use crate::game::player::{Player, PlayerClickEvent, ThrowSeedEvent, can_player_reach};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy::sprite::SpriteImageMode::Tiled;
@@ -104,6 +104,7 @@ fn draw_outline(mut painter: ShapePainter, q_farm: Query<&Farm>) {
 fn on_player_click(
     mut click_events: EventReader<PlayerClickEvent>,
     mut sow_events: EventWriter<SowPlantEvent>,
+    mut throw_seed_events: EventWriter<ThrowSeedEvent>,
     q_player: Query<&Transform, With<Player>>,
     q_farm: Query<&Farm>,
     q_plants: Query<&Transform, With<Plant>>,
@@ -133,15 +134,20 @@ fn on_player_click(
                         "Can't plant at {:?} - plant already present at {:?}",
                         click_position, plant_position
                     );
-                    // TODO play a sound
                     can_sow = false;
                 }
             }
 
             if can_sow {
                 // Actually sow a plant
+                // TODO don't actually sow until seed hits the ground
                 sow_events.write(SowPlantEvent {
                     position: click_position,
+                });
+
+                // TODO handle multiple throws in a chain
+                throw_seed_events.write(ThrowSeedEvent {
+                    origin: click_position,
                 });
             }
         }

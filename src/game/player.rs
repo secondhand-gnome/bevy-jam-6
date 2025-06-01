@@ -1,6 +1,7 @@
 //! Player-specific behavior.
 
 use crate::asset_tracking::LoadResource;
+use crate::audio::sound_effect;
 use bevy::input::common_conditions::*;
 use bevy::window::PrimaryWindow;
 use bevy::{
@@ -8,6 +9,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_vector_shapes::prelude::*;
+use rand::prelude::SliceRandom;
 
 const PLAYER_THROW_RADIUS_PX: f32 = 240.;
 
@@ -22,7 +24,10 @@ pub(super) fn plugin(app: &mut App) {
         on_click.run_if(input_just_pressed(MouseButton::Left)),
     );
 
-    app.add_systems(Update, draw_player_circle);
+    app.add_systems(
+        Update,
+        (draw_player_circle, animate_throw_seed).run_if(resource_exists::<PlayerAssets>),
+    );
 }
 
 /// The player character.
@@ -60,10 +65,18 @@ pub struct Player;
 pub struct PlayerAssets {
     #[dependency]
     farmer: Handle<Image>,
+    #[dependency]
+    throw_sounds: Vec<Handle<AudioSource>>,
 }
 
 #[derive(Event, Debug, Default)]
 pub struct PlayerClickEvent(pub Vec2);
+
+#[derive(Event, Debug, Default)]
+// TODO track who is the origin of the throw
+pub struct ThrowSeedEvent {
+    pub origin: Vec2,
+}
 
 pub fn can_player_reach(player_position: Vec2, hit_position: Vec2) -> bool {
     let difference = player_position - hit_position;
@@ -81,6 +94,16 @@ impl FromWorld for PlayerAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+            throw_sounds: vec![
+                assets.load("audio/sound_effects/woosh/woosh1.ogg"),
+                assets.load("audio/sound_effects/woosh/woosh2.ogg"),
+                assets.load("audio/sound_effects/woosh/woosh3.ogg"),
+                assets.load("audio/sound_effects/woosh/woosh4.ogg"),
+                assets.load("audio/sound_effects/woosh/woosh5.ogg"),
+                assets.load("audio/sound_effects/woosh/woosh6.ogg"),
+                assets.load("audio/sound_effects/woosh/woosh7.ogg"),
+                assets.load("audio/sound_effects/woosh/woosh8.ogg"),
+            ],
         }
     }
 }
@@ -117,5 +140,22 @@ fn draw_player_circle(mut painter: ShapePainter, q_player: Query<&Transform, Wit
         painter.hollow = true;
         painter.thickness = 1.0;
         painter.circle(PLAYER_THROW_RADIUS_PX);
+    }
+}
+
+fn animate_throw_seed(
+    mut commands: Commands,
+    mut events: EventReader<ThrowSeedEvent>,
+    player_assets: Res<PlayerAssets>,
+) {
+    // TODO if player not thrower, don't handle event
+    // TODO animate throw
+    for ev in events.read() {
+        let rng = &mut rand::thread_rng();
+        let throw_sound = player_assets.throw_sounds.choose(rng).unwrap().clone();
+        commands.spawn((
+            sound_effect(throw_sound),
+            Transform::from_translation(ev.origin.extend(0.)),
+        ));
     }
 }
