@@ -10,6 +10,7 @@
 
 ## Milestone 2
 
+- [ ] Sounds for Milestone 1
 - [ ] Timer displays next to seedling while it grows
 - [ ] Enemies come from the right towards the nearest plant
 - [ ] Enemies inflict damage on plants by eating them
@@ -17,6 +18,8 @@
 
 ## Milestone 3
 
+- [ ] Sounds for Milestone 2
+- [ ] Background Music
 - [ ] Select a plant type before throwing a seed
 - [ ] Enemies die at 0 health
 - [ ] A Pineapple plant inflicts damage when stepped on
