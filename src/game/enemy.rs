@@ -17,7 +17,7 @@ use rand::prelude::SliceRandom;
 const ENEMY_RADIUS: f32 = 30.0;
 const EAT_RADIUS_PX: f32 = 80.0;
 const SPAWN_INTERVAL_S: f32 = 1.0;
-const ENEMY_MOVE_SPEED: f32 = 0.5;
+const ENEMY_MOVE_SPEED: f32 = 20.0;
 const ENEMY_SPAWN_LIMIT: usize = 10;
 const BITE_COOLDOWN_S: f32 = 2.5;
 const BITE_STRENGTH: i32 = 1;
@@ -283,7 +283,7 @@ fn pursue_plants(
         } else {
             // Move towards the plant
             // TODO use A* pathfinding here
-            *enemy_velocity = LinearVelocity(ENEMY_MOVE_SPEED * plant_vector.xy());
+            *enemy_velocity = LinearVelocity(ENEMY_MOVE_SPEED * plant_vector.xy().normalize());
         }
 
         // const ENEMY_VISION_RADIUS: f32 = 2000.;
