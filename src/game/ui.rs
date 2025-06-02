@@ -1,0 +1,68 @@
+use crate::game::plant::{PlantAssets, PlantType};
+use bevy::prelude::*;
+use bevy_cobweb::prelude::*;
+use bevy_cobweb_ui::prelude::*;
+
+pub(super) fn plugin(app: &mut App) {
+    app.add_plugins(CobwebUiPlugin).load("ui/hello.cobweb");
+}
+
+pub fn build_ui(
+    mut commands: Commands,
+    mut scene_builder: SceneBuilder,
+    plant_assets: Res<PlantAssets>,
+) {
+    let seed_types = vec![PlantType::Daisy];
+
+    commands
+        .ui_root()
+        .spawn_scene(("ui/hello.cobweb", "scene"), &mut scene_builder, |h| {
+            h.insert_reactive(SeedSelection::default());
+            let scene_entity = h.id();
+
+            h.edit("seed_button_daisy", |h| {
+                h.on_pressed(
+                    move |mut c: Commands, mut seed_selection: ReactiveMut<SeedSelection>| {
+                        seed_selection
+                            .get_mut(&mut c, scene_entity)?
+                            .set_seed_type(PlantType::Daisy);
+                        OK
+                    },
+                );
+            });
+            h.edit("seed_button_pineapple", |h| {
+                h.on_pressed(
+                    move |mut c: Commands, mut seed_selection: ReactiveMut<SeedSelection>| {
+                        seed_selection
+                            .get_mut(&mut c, scene_entity)?
+                            .set_seed_type(PlantType::Pineapple);
+                        OK
+                    },
+                );
+            });
+            h.edit("seed_button_dragonfruit", |h| {
+                h.on_pressed(
+                    move |mut c: Commands, mut seed_selection: ReactiveMut<SeedSelection>| {
+                        seed_selection
+                            .get_mut(&mut c, scene_entity)?
+                            .set_seed_type(PlantType::Dragonfruit);
+                        OK
+                    },
+                );
+            });
+        });
+}
+
+// TODO hide UI on exit
+
+#[derive(ReactComponent, Default)]
+struct SeedSelection {
+    seed_type: PlantType,
+}
+
+impl SeedSelection {
+    fn set_seed_type(&mut self, seed_type: PlantType) {
+        info!("Set seed type to {:?}", seed_type);
+        self.seed_type = seed_type;
+    }
+}

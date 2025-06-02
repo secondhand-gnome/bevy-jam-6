@@ -1,15 +1,15 @@
 //! Spawn the main level.
 
-use bevy::prelude::*;
-
 use crate::game::barn::{BarnAssets, barn};
 use crate::game::farm::{FarmAssets, farm};
+use crate::theme::widget;
 use crate::{
     asset_tracking::LoadResource,
     audio::music,
     game::player::{PlayerAssets, player},
     screens::Screen,
 };
+use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<LevelAssets>();
@@ -56,4 +56,16 @@ pub fn spawn_level(
             ),
         ],
     ));
+
+    commands.spawn((
+        widget::ui_root("In Game UI"),
+        GlobalZIndex(2),
+        StateScoped(Screen::Gameplay),
+        children![widget::button("Daisy", select_daisy)],
+    ));
 }
+
+fn select_daisy(_: Trigger<Pointer<Click>>) {
+    info!("Select plant Daisy");
+}
+

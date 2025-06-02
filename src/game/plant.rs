@@ -80,6 +80,14 @@ pub struct PlantAssets {
     death_sound: Handle<AudioSource>,
 }
 
+#[derive(Default, Debug)]
+pub enum PlantType {
+    #[default]
+    Daisy,
+    Pineapple,
+    Dragonfruit,
+}
+
 #[derive(Event, Debug, Default)]
 pub struct SowPlantEvent {
     pub position: Vec2,

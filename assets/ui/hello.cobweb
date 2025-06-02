@@ -1,0 +1,35 @@
+#defs
++seed_item = \
+    GridNode{ justify_main:Center justify_self_cross:Stretch }
+    GridColumn{ span:1 }
+    Splat<Border>(1px)
+    Splat<Padding>(20px)
+    Splat<Margin>(5px)
+    BrRadius(5px)
+    BorderColor(#1c1b44)
+    Responsive<BackgroundColor>{ idle:#4f5269 hover:#96f5d9 press:#6eced4 }
+
+    "text"
+        FlexNode
+        TextLine{ text:"" size:30 }
+\
+
+#scenes
+"scene"
+    FlexNode{ padding:{top:8px bottom:8px left:8px right:8px}, margin:{top:8px left:8px} }
+    BackgroundColor(#bce7ff)
+
+    "seed_button_daisy"
+        FlexNode{ margin:{top:4px left:4px}}
+        BackgroundColor(#4f5269)
+            +seed_item{}
+
+    "seed_button_pineapple"
+        FlexNode{ margin:{top:4px left:4px}}
+        BackgroundColor(#4f5269)
+            +seed_item{}
+
+    "seed_button_dragonfruit"
+        FlexNode{ margin:{top:4px left:4px}}
+        BackgroundColor(#4f5269)
+            +seed_item{}
