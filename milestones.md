@@ -21,7 +21,7 @@
 
 - [x] Sounds for Milestone 2
 - [x] Background Music
-- [ ] Select a plant type before throwing a seed
+- [x] Select a plant type before throwing a seed
 - [ ] Enemies die at 0 health
 - [ ] A Pineapple plant inflicts damage when stepped on
 - [ ] A Dragonfruit plant inflicts damage when adjacent to an enemy

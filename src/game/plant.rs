@@ -60,6 +60,12 @@ pub struct Plant {
     plant_type: PlantType,
 }
 
+impl Plant {
+    pub fn plant_type(&self) -> PlantType {
+        self.plant_type
+    }
+}
+
 #[derive(Component, Debug, Clone, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
 struct GrowthTimer(Timer);

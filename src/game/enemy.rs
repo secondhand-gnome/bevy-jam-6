@@ -4,7 +4,7 @@ use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use crate::game::physics::GameLayer;
-use crate::game::plant::{DamagePlantEvent, Plant};
+use crate::game::plant::{DamagePlantEvent, Plant, PlantType};
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
 use avian2d::prelude::*;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
@@ -178,7 +178,7 @@ fn pursue_plants(
         ),
         With<Enemy>,
     >,
-    q_plants: Query<(Entity, &Transform), With<Plant>>,
+    q_plants: Query<(Entity, &Transform, &Plant)>,
     mut damage_plant_events: EventWriter<DamagePlantEvent>,
     enemy_assets: Res<EnemyAssets>,
 ) {
@@ -192,13 +192,20 @@ fn pursue_plants(
 
         let mut plant_vectors: Vec<_> = q_plants
             .iter()
-            .map(|(plant, plant_transform)| {
+            .filter(|(_, _, plant)| plant.plant_type() == PlantType::Daisy)
+            .map(|(plant, plant_transform, _)| {
                 (
                     plant,
                     plant_transform.translation - enemy_transform.translation,
                 )
             })
             .collect();
+
+        if plant_vectors.is_empty() {
+            // No plants - hold still
+            *enemy_velocity = LinearVelocity(Vec2::ZERO);
+            continue;
+        }
 
         // Sort plants by distance from this enemy
         plant_vectors.sort_by(|a, b| a.1.length().partial_cmp(&b.1.length()).unwrap());
