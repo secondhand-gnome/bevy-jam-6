@@ -5,7 +5,7 @@ use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
-use crate::game::plant::{DamagePlantEvent, Plant, PlantType};
+use crate::game::plant::{DamagePlantEvent, PINEAPPLE_STRENGTH, Plant, PlantType};
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
 use avian2d::prelude::*;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
@@ -89,6 +89,7 @@ pub struct EnemyAssets {
     rat_hit: Handle<Image>,
     rat_walk: Handle<Image>,
     bite_sounds: Vec<Handle<AudioSource>>,
+    rat_damage_sound: Handle<AudioSource>,
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Default, Reflect)]
@@ -148,6 +149,7 @@ impl FromWorld for EnemyAssets {
                 assets.load("audio/sound_effects/bite/bite2.ogg"),
                 assets.load("audio/sound_effects/bite/bite3.ogg"),
             ],
+            rat_damage_sound: assets.load("audio/sound_effects/rat_damage.ogg"),
         }
     }
 }
@@ -196,6 +198,7 @@ fn pursue_plants(
     >,
     q_plants: Query<(Entity, &Transform, &Plant)>,
     mut damage_plant_events: EventWriter<DamagePlantEvent>,
+    mut damage_enemy_events: EventWriter<DamageEnemyEvent>,
     enemy_assets: Res<EnemyAssets>,
 ) {
     for (enemy, enemy_transform, mut enemy_velocity, optional_bite_cooldown) in q_enemies.iter_mut()
@@ -208,11 +211,11 @@ fn pursue_plants(
 
         let mut plant_vectors: Vec<_> = q_plants
             .iter()
-            .filter(|(_, _, plant)| plant.plant_type() == PlantType::Daisy)
-            .map(|(plant, plant_transform, _)| {
+            .map(|(entity, plant_transform, plant)| {
                 (
-                    plant,
+                    entity,
                     plant_transform.translation - enemy_transform.translation,
+                    plant,
                 )
             })
             .collect();
@@ -225,20 +228,42 @@ fn pursue_plants(
 
         // Sort plants by distance from this enemy
         plant_vectors.sort_by(|a, b| a.1.length().partial_cmp(&b.1.length()).unwrap());
-        let (closest_plant, closest_plant_vector) = plant_vectors.first().unwrap();
+        let (plant_entity, plant_vector, plant) = plant_vectors.first().unwrap();
 
-        if closest_plant_vector.length() < EAT_RADIUS_PX {
+        if plant_vector.length() < EAT_RADIUS_PX {
             // Eat the plant
             if optional_bite_cooldown.is_some() {
                 // In cooldown - cannot bite
             } else {
                 // Bite
-                info!("Bite plant {:?}", closest_plant);
+                info!("Bite plant {:?}", plant_entity);
 
                 damage_plant_events.write(DamagePlantEvent {
-                    plant_entity: *closest_plant,
+                    plant_entity: *plant_entity,
                     amount: BITE_STRENGTH,
                 });
+
+                match plant.plant_type() {
+                    PlantType::Daisy => {
+                        // Do nothing
+                    }
+                    PlantType::Pineapple => {
+                        // Enemy takes damage
+                        damage_enemy_events.write(DamageEnemyEvent {
+                            enemy_entity: enemy,
+                            amount: PINEAPPLE_STRENGTH,
+                        });
+
+                        // TODO chain reaction - create more nearby pineapples that are weaker
+                        commands.spawn((
+                            sound_effect(enemy_assets.rat_damage_sound.clone()),
+                            Transform::from_translation(enemy_transform.translation),
+                        ));
+                    }
+                    PlantType::Dragonfruit => {
+                        // TODO dragonfruit damage
+                    }
+                }
 
                 commands
                     .entity(enemy)
@@ -258,7 +283,7 @@ fn pursue_plants(
         } else {
             // Move towards the plant
             // TODO use A* pathfinding here
-            *enemy_velocity = LinearVelocity(ENEMY_MOVE_SPEED * closest_plant_vector.xy());
+            *enemy_velocity = LinearVelocity(ENEMY_MOVE_SPEED * plant_vector.xy());
         }
 
         // const ENEMY_VISION_RADIUS: f32 = 2000.;

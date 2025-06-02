@@ -15,6 +15,7 @@ use rand::prelude::SliceRandom;
 const PLANT_RADIUS_PX: f32 = 30.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
 const PLANT_MAX_HEALTH: i32 = 5; // TODO depends on plant type
+pub const PINEAPPLE_STRENGTH: i32 = 2;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Plant>();

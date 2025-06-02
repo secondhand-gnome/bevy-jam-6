@@ -22,8 +22,8 @@
 - [x] Sounds for Milestone 2
 - [x] Background Music
 - [x] Select a plant type before throwing a seed
-- [ ] Enemies die at 0 health
-- [ ] A Pineapple plant inflicts damage when stepped on
+- [x] Enemies die at 0 health
+- [ ] A Pineapple plant inflicts damage when stepped on, knocking enemy back with an immunity grace period
 - [ ] A Dragonfruit plant inflicts damage when adjacent to an enemy
 
 ## Milestone 4
