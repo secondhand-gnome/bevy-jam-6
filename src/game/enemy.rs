@@ -270,7 +270,7 @@ fn pursue_plants(
                             enemy_entity: enemy,
                             amount: DRAGONFRUIT_STRENGTH,
                         });
-                        
+
                         spew_fire_events.write(SpewFireEvent {
                             plant_entity: *plant_entity,
                             origin: plant_transform.translation,

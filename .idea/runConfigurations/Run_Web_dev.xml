@@ -13,7 +13,6 @@
     <option name="EXECUTE_SCRIPT_FILE" value="false" />
     <envs>
       <env name="RUST_BACKTRACE" value="full" />
-      <env name="RUSTFLAGS" value="--cfg getrandom_backend=&quot;wasm_js&quot;" />
     </envs>
     <method v="2" />
   </configuration>
