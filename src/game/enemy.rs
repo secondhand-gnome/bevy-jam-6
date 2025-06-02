@@ -6,7 +6,7 @@ use crate::audio::sound_effect;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
 use crate::game::plant::{
-    DRAGONFRUIT_STRENGTH, DamagePlantEvent, PINEAPPLE_STRENGTH, Plant, PlantType,
+    DRAGONFRUIT_STRENGTH, DamagePlantEvent, PINEAPPLE_STRENGTH, Plant, PlantType, SpewFireEvent,
 };
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
 use avian2d::prelude::*;
@@ -201,6 +201,7 @@ fn pursue_plants(
     q_plants: Query<(Entity, &Transform, &Plant)>,
     mut damage_plant_events: EventWriter<DamagePlantEvent>,
     mut damage_enemy_events: EventWriter<DamageEnemyEvent>,
+    mut spew_fire_events: EventWriter<SpewFireEvent>,
     enemy_assets: Res<EnemyAssets>,
 ) {
     for (enemy, enemy_transform, mut enemy_velocity, optional_bite_cooldown) in q_enemies.iter_mut()
@@ -218,6 +219,7 @@ fn pursue_plants(
                     entity,
                     plant_transform.translation - enemy_transform.translation,
                     plant,
+                    plant_transform,
                 )
             })
             .collect();
@@ -230,7 +232,7 @@ fn pursue_plants(
 
         // Sort plants by distance from this enemy
         plant_vectors.sort_by(|a, b| a.1.length().partial_cmp(&b.1.length()).unwrap());
-        let (plant_entity, plant_vector, plant) = plant_vectors.first().unwrap();
+        let (plant_entity, plant_vector, plant, plant_transform) = plant_vectors.first().unwrap();
 
         if plant_vector.length() < EAT_RADIUS_PX {
             // Eat the plant
@@ -268,8 +270,12 @@ fn pursue_plants(
                             enemy_entity: enemy,
                             amount: DRAGONFRUIT_STRENGTH,
                         });
+                        
+                        spew_fire_events.write(SpewFireEvent {
+                            plant_entity: *plant_entity,
+                            origin: plant_transform.translation,
+                        });
 
-                        // TODO chain reaction - fire
                         commands.spawn((
                             sound_effect(enemy_assets.rat_damage_sound.clone()),
                             Transform::from_translation(enemy_transform.translation),

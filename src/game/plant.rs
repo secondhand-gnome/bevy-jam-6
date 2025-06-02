@@ -4,7 +4,7 @@ use crate::audio::sound_effect;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
 use crate::theme::palette::{PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
-use avian2d::prelude::{Collider, CollisionLayers, RigidBody};
+use avian2d::prelude::{Collider, CollisionLayers, LinearVelocity, RigidBody};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy_cobweb::prelude::*;
@@ -17,6 +17,8 @@ const DAISY_GROWTH_TIME_S: f32 = 3.;
 const PLANT_MAX_HEALTH: i32 = 5; // TODO depends on plant type
 pub const PINEAPPLE_STRENGTH: i32 = 2;
 pub const DRAGONFRUIT_STRENGTH: i32 = 1;
+const FIREBALL_RADIUS_PX: f32 = 30.;
+const FIREBALL_LIFETIME_S: f32 = 1.0;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Plant>();
@@ -26,9 +28,13 @@ pub(super) fn plugin(app: &mut App) {
 
     app.add_event::<SowPlantEvent>();
     app.add_event::<DamagePlantEvent>();
+    app.add_event::<SpewFireEvent>();
+
+    // TODO make fireballs damage enemies
+    // TODO despawn fireballs
     app.add_systems(
         Update,
-        (sow_plants, damage_plants, tick_growth)
+        (sow_plants, damage_plants, tick_growth, spew_fire)
             .run_if(resource_exists::<PlantAssets>)
             .in_set(PausableSystems),
     );
@@ -52,6 +58,29 @@ fn plant(position: Vec2, plant_assets: &PlantAssets, plant_type: PlantType) -> i
     )
 }
 
+fn fireball(
+    spawning_entity: Entity,
+    origin: Vec3,
+    direction: Vec2,
+    plant_assets: &PlantAssets,
+) -> impl Bundle {
+    (
+        Name::new("Fireball"),
+        Fireball { spawning_entity },
+        RigidBody::Kinematic,
+        Collider::circle(FIREBALL_RADIUS_PX),
+        CollisionLayers::new([GameLayer::Fireball], [GameLayer::Enemy]), // TODO also interact with plants
+        Sprite {
+            image: plant_assets.fireball.clone(),
+            ..default()
+        },
+        FireballLifeTimer(Timer::from_seconds(FIREBALL_LIFETIME_S, TimerMode::Once)),
+        Transform::from_translation(origin),
+        LinearVelocity(direction),
+    )
+}
+// commands.spawn(fireball(ev.plant_entity, ev.origin, direction, LIFETIME_S));
+
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
 pub struct Plant {
@@ -68,6 +97,16 @@ impl Plant {
 #[reflect(Component)]
 struct GrowthTimer(Timer);
 
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Reflect)]
+#[reflect(Component)]
+pub struct Fireball {
+    spawning_entity: Entity,
+}
+
+#[derive(Component, Debug, Clone, PartialEq, Eq, Default, Reflect)]
+#[reflect(Component)]
+struct FireballLifeTimer(Timer);
+
 #[derive(Resource, Asset, Clone, Reflect)]
 #[reflect(Resource)]
 pub struct PlantAssets {
@@ -80,11 +119,15 @@ pub struct PlantAssets {
     #[dependency]
     seedling: Handle<Image>,
     #[dependency]
+    fireball: Handle<Image>,
+    #[dependency]
     sow_sounds: Vec<Handle<AudioSource>>,
     #[dependency]
     growth_sound: Handle<AudioSource>,
     #[dependency]
     death_sound: Handle<AudioSource>,
+    #[dependency]
+    fireball_spawn_sound: Handle<AudioSource>,
 }
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Reflect)]
@@ -121,6 +164,12 @@ pub struct SowPlantEvent {
 pub struct DamagePlantEvent {
     pub plant_entity: Entity,
     pub amount: i32,
+}
+
+#[derive(Event, Debug)]
+pub struct SpewFireEvent {
+    pub plant_entity: Entity,
+    pub origin: Vec3,
 }
 
 pub fn plant_collision_check(plant_position: Vec2, hit_position: Vec2) -> bool {
@@ -160,12 +209,20 @@ impl FromWorld for PlantAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+            fireball: assets.load_with_settings(
+                "images/plants/fireball.png",
+                |settings: &mut ImageLoaderSettings| {
+                    // Use `nearest` image sampling to preserve pixel art style.
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
             sow_sounds: vec![
                 assets.load("audio/sound_effects/sow1.ogg"),
                 assets.load("audio/sound_effects/sow2.ogg"),
             ],
             growth_sound: assets.load("audio/sound_effects/growth.ogg"),
             death_sound: assets.load("audio/sound_effects/death.ogg"),
+            fireball_spawn_sound: assets.load("audio/sound_effects/fireball_spawn.ogg"),
         }
     }
 }
@@ -279,5 +336,33 @@ fn damage_plants(
                 info!("Damage plant {:?} for {}", plant_entity, ev.amount);
             }
         }
+    }
+}
+
+fn spew_fire(
+    mut commands: Commands,
+    mut spew_fire_events: EventReader<SpewFireEvent>,
+    plant_assets: Res<PlantAssets>,
+) {
+    for ev in spew_fire_events.read() {
+        const SPAWN_SPEED: f32 = 10.0;
+        const DIRECTIONS: [Vec2; 4] = [
+            Vec2::new(SPAWN_SPEED, 0.),
+            Vec2::new(-SPAWN_SPEED, 0.),
+            Vec2::new(0., SPAWN_SPEED),
+            Vec2::new(0., -SPAWN_SPEED),
+        ];
+        for direction in DIRECTIONS {
+            commands.spawn(fireball(
+                ev.plant_entity,
+                ev.origin,
+                direction,
+                &plant_assets,
+            ));
+        }
+        commands.spawn((
+            sound_effect(plant_assets.fireball_spawn_sound.clone()),
+            Transform::from_translation(ev.origin),
+        ));
     }
 }
