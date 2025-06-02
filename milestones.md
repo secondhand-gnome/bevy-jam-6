@@ -15,12 +15,12 @@
 - [x] Enemies come from the right towards the nearest plant
 - [x] Enemies inflict damage on plants by eating them
 - [x] Plants die at 0 health
-- [ ] Touch screen support
+- [x] Touch screen support
 
 ## Milestone 3
 
-- [ ] Sounds for Milestone 2
-- [ ] Background Music
+- [x] Sounds for Milestone 2
+- [x] Background Music
 - [ ] Select a plant type before throwing a seed
 - [ ] Enemies die at 0 health
 - [ ] A Pineapple plant inflicts damage when stepped on
