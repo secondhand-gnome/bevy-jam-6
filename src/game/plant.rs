@@ -15,10 +15,15 @@ use rand::prelude::SliceRandom;
 const PLANT_RADIUS_PX: f32 = 30.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
 const PLANT_MAX_HEALTH: i32 = 5; // TODO depends on plant type
+
 pub const PINEAPPLE_STRENGTH: i32 = 2;
+
 pub const DRAGONFRUIT_STRENGTH: i32 = 1;
+
 const FIREBALL_RADIUS_PX: f32 = 30.;
+const FIREBALL_START_OFFSET_PX: f32 = 40.;
 const FIREBALL_LIFETIME_S: f32 = 1.0;
+const FIREBALL_MOVE_SPEED: f32 = 15.0;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Plant>();
@@ -34,7 +39,13 @@ pub(super) fn plugin(app: &mut App) {
     // TODO despawn fireballs
     app.add_systems(
         Update,
-        (sow_plants, damage_plants, tick_growth, spew_fire)
+        (
+            sow_plants,
+            damage_plants,
+            tick_growth,
+            spew_fire,
+            tick_fireball_lifetime,
+        )
             .run_if(resource_exists::<PlantAssets>)
             .in_set(PausableSystems),
     );
@@ -75,7 +86,9 @@ fn fireball(
             ..default()
         },
         FireballLifeTimer(Timer::from_seconds(FIREBALL_LIFETIME_S, TimerMode::Once)),
-        Transform::from_translation(origin),
+        Transform::from_translation(
+            origin + FIREBALL_START_OFFSET_PX * direction.extend(0.).normalize(),
+        ),
         LinearVelocity(direction),
     )
 }
@@ -210,7 +223,7 @@ impl FromWorld for PlantAssets {
                 },
             ),
             fireball: assets.load_with_settings(
-                "images/plants/fireball.png",
+                "images/fireball.png",
                 |settings: &mut ImageLoaderSettings| {
                     // Use `nearest` image sampling to preserve pixel art style.
                     settings.sampler = ImageSampler::nearest();
@@ -324,6 +337,19 @@ fn tick_growth(
     }
 }
 
+fn tick_fireball_lifetime(
+    mut commands: Commands,
+    q_fireballs: Query<(Entity, &mut FireballLifeTimer), With<Fireball>>,
+    time: Res<Time>,
+) {
+    for (entity, mut timer) in q_fireballs {
+        timer.0.tick(time.delta());
+        if timer.0.just_finished() {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
 fn damage_plants(
     mut q_plants: Query<(Entity, &mut Health), With<Plant>>,
     mut damage_plant_events: EventReader<DamagePlantEvent>,
@@ -345,12 +371,11 @@ fn spew_fire(
     plant_assets: Res<PlantAssets>,
 ) {
     for ev in spew_fire_events.read() {
-        const SPAWN_SPEED: f32 = 10.0;
         const DIRECTIONS: [Vec2; 4] = [
-            Vec2::new(SPAWN_SPEED, 0.),
-            Vec2::new(-SPAWN_SPEED, 0.),
-            Vec2::new(0., SPAWN_SPEED),
-            Vec2::new(0., -SPAWN_SPEED),
+            Vec2::new(FIREBALL_MOVE_SPEED, 0.),
+            Vec2::new(-FIREBALL_MOVE_SPEED, 0.),
+            Vec2::new(0., FIREBALL_MOVE_SPEED),
+            Vec2::new(0., -FIREBALL_MOVE_SPEED),
         ];
         for direction in DIRECTIONS {
             commands.spawn(fireball(
