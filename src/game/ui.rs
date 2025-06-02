@@ -7,10 +7,7 @@ pub(super) fn plugin(app: &mut App) {
     app.add_plugins(CobwebUiPlugin).load("ui/hello.cobweb");
 }
 
-pub fn build_ui(
-    mut commands: Commands,
-    mut scene_builder: SceneBuilder,
-) {
+pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
     commands
         .ui_root()
         .spawn_scene(("ui/hello.cobweb", "scene"), &mut scene_builder, |h| {
@@ -51,4 +48,3 @@ pub fn build_ui(
 }
 
 // TODO hide UI on exit
-

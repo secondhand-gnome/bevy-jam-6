@@ -118,7 +118,6 @@ impl PlayerAnimation {
         self.timer.tick(delta);
         if self.timer.finished() {
             self.update_state(PlayerAnimationState::Idling);
-            return;
         }
     }
 
