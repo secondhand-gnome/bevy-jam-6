@@ -3,7 +3,7 @@ use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
-use crate::theme::palette::{PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE, PLANT_HEALTH_OUTLINE};
+use crate::theme::palette::{PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
 use avian2d::prelude::{Collider, CollisionLayers, RigidBody};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
@@ -26,15 +26,11 @@ pub(super) fn plugin(app: &mut App) {
     app.add_event::<DamagePlantEvent>();
     app.add_systems(
         Update,
-        (sow_plants, damage_plants).run_if(resource_exists::<PlantAssets>),
-    );
-    app.add_systems(
-        Update,
-        tick_growth
+        (sow_plants, damage_plants, tick_growth)
             .run_if(resource_exists::<PlantAssets>)
             .in_set(PausableSystems),
     );
-    app.add_systems(Update, (draw_plant_circles, draw_growth, draw_health));
+    app.add_systems(Update, (draw_plant_circles, draw_growth));
 }
 
 fn plant(position: Vec2, plant_assets: &PlantAssets, plant_type: PlantType) -> impl Bundle {
@@ -119,7 +115,6 @@ pub struct SowPlantEvent {
     pub seed_type: PlantType,
 }
 
-// TODO generalize for enemies as well
 #[derive(Event, Debug)]
 pub struct DamagePlantEvent {
     pub plant_entity: Entity,
@@ -231,29 +226,6 @@ fn draw_growth(
     }
 }
 
-fn draw_health(mut painter: ShapePainter, q_plants: Query<(&Transform, &Health), With<Plant>>) {
-    const HEALTH_HEIGHT_PX: f32 = PLANT_RADIUS_PX * 0.2;
-    const HEALTH_LENGTH_PX: f32 = PLANT_RADIUS_PX * 1.;
-    const HEALTH_DIMENS: Vec2 = Vec2::new(HEALTH_LENGTH_PX, HEALTH_HEIGHT_PX);
-    const HEALTH_OFFSET: Vec3 = Vec3::new(0., 1.1 * PLANT_RADIUS_PX, 0.);
-
-    for (transform, health) in q_plants {
-        // Draw the remaining health
-        painter.transform.translation = transform.translation + HEALTH_OFFSET;
-        painter.hollow = true;
-        painter.thickness = 0.5;
-        painter.color = PLANT_HEALTH_OUTLINE;
-        painter.rect(HEALTH_DIMENS);
-
-        painter.hollow = false;
-        painter.color = health.bar_color();
-        painter.rect(Vec2::new(
-            HEALTH_DIMENS.x * health.fraction(),
-            HEALTH_DIMENS.y * 0.8,
-        ));
-    }
-}
-
 fn tick_growth(
     mut commands: Commands,
     mut q_growing_plants: Query<(Entity, &Plant, &mut Transform, &mut GrowthTimer)>,
@@ -294,7 +266,7 @@ fn tick_growth(
 }
 
 fn damage_plants(
-    mut q_plants: Query<(Entity, &mut Health), With<Plant>>, // TODO plant health
+    mut q_plants: Query<(Entity, &mut Health), With<Plant>>,
     mut damage_plant_events: EventReader<DamagePlantEvent>,
 ) {
     // TODO particle effects on plant damage

@@ -1,7 +1,10 @@
+use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
-use crate::theme::palette::{HEALTH_HIGH, HEALTH_LOW, HEALTH_MED};
+use crate::theme::palette::{HEALTH_HIGH, HEALTH_LOW, HEALTH_MED, HEALTH_OUTLINE};
 use bevy::prelude::*;
+use bevy_vector_shapes::painter::ShapePainter;
+use bevy_vector_shapes::prelude::RectPainter;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Health>();
@@ -9,7 +12,14 @@ pub(super) fn plugin(app: &mut App) {
     app.register_type::<HealthAssets>();
     app.load_resource::<HealthAssets>();
 
-    app.add_systems(Update, remove_dead.run_if(resource_exists::<HealthAssets>));
+    app.add_systems(Update, draw_health);
+
+    app.add_systems(
+        Update,
+        remove_dead
+            .run_if(resource_exists::<HealthAssets>)
+            .in_set(PausableSystems),
+    );
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
@@ -86,5 +96,28 @@ fn remove_dead(
 
             // TODO spawn particle effects
         }
+    }
+}
+
+fn draw_health(mut painter: ShapePainter, q_creatures: Query<(&Transform, &Health)>) {
+    const HEALTH_HEIGHT_PX: f32 = 30. * 0.2;
+    const HEALTH_LENGTH_PX: f32 = 30. * 1.;
+    const HEALTH_DIMENS: Vec2 = Vec2::new(HEALTH_LENGTH_PX, HEALTH_HEIGHT_PX);
+    const HEALTH_OFFSET: Vec3 = Vec3::new(0., 1.1 * 30., 0.);
+
+    for (transform, health) in q_creatures {
+        // Draw the remaining health
+        painter.transform.translation = transform.translation + HEALTH_OFFSET;
+        painter.hollow = true;
+        painter.thickness = 0.5;
+        painter.color = HEALTH_OUTLINE;
+        painter.rect(HEALTH_DIMENS);
+
+        painter.hollow = false;
+        painter.color = health.bar_color();
+        painter.rect(Vec2::new(
+            HEALTH_DIMENS.x * health.fraction(),
+            HEALTH_DIMENS.y * 0.8,
+        ));
     }
 }

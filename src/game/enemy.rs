@@ -3,6 +3,7 @@
 use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
+use crate::game::health::Health;
 use crate::game::physics::GameLayer;
 use crate::game::plant::{DamagePlantEvent, Plant, PlantType};
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
@@ -20,6 +21,7 @@ const ENEMY_MOVE_SPEED: f32 = 0.5;
 const ENEMY_SPAWN_LIMIT: usize = 10;
 const BITE_COOLDOWN_S: f32 = 2.5;
 const BITE_STRENGTH: i32 = 1;
+const ENEMY_MAX_HEALTH: i32 = 5;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Enemy>();
@@ -27,9 +29,16 @@ pub(super) fn plugin(app: &mut App) {
     app.register_type::<EnemyAssets>();
     app.load_resource::<EnemyAssets>();
 
+    app.add_event::<DamageEnemyEvent>();
+
     app.add_systems(
         Update,
-        (tick_spawn, tick_bite_cooldowns, pursue_plants)
+        (
+            tick_spawn,
+            tick_bite_cooldowns,
+            pursue_plants,
+            damage_enemies,
+        )
             .run_if(resource_exists::<EnemyAssets>)
             .in_set(PausableSystems),
     );
@@ -57,6 +66,7 @@ fn enemy(spawn_position: Vec3, enemy_assets: &EnemyAssets) -> impl Bundle {
             image: enemy_assets.rat.clone(),
             ..default()
         },
+        Health::new(ENEMY_MAX_HEALTH),
         Transform::from_translation(spawn_position),
         children![(
             Name::new("Enemy eat collider"),
@@ -94,6 +104,12 @@ struct SpawnTimer(Timer);
 #[derive(Component, Debug, Clone, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
 struct BiteCooldown(Timer);
+
+#[derive(Event, Debug)]
+pub struct DamageEnemyEvent {
+    pub enemy_entity: Entity,
+    pub amount: i32,
+}
 
 impl FromWorld for EnemyAssets {
     fn from_world(world: &mut World) -> Self {
@@ -275,6 +291,21 @@ fn tick_bite_cooldowns(
 
         if cooldown.0.finished() {
             commands.entity(entity).remove::<BiteCooldown>();
+        }
+    }
+}
+
+fn damage_enemies(
+    mut q_enemies: Query<(Entity, &mut Health), With<Enemy>>,
+    mut damage_enemy_events: EventReader<DamageEnemyEvent>,
+) {
+    // TODO particle effects on enemy damage
+    for ev in damage_enemy_events.read() {
+        for (entity, mut health) in q_enemies.iter_mut() {
+            if entity == ev.enemy_entity {
+                health.reduce(ev.amount);
+                info!("Damage enemy {:?} for {}", entity, ev.amount);
+            }
         }
     }
 }

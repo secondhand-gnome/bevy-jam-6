@@ -24,7 +24,7 @@ pub const PLANT_GROWTH_FOREGROUND: Color = Color::srgb(0.588, 0.961, 0.851);
 pub const ENEMY_EAT_OUTLINE: Color = Color::srgb(0.859, 0.255, 0.055);
 
 /// #6bca25
-pub const PLANT_HEALTH_OUTLINE: Color = Color::srgb(0.420, 0.792, 0.145);
+pub const HEALTH_OUTLINE: Color = Color::srgb(0.420, 0.792, 0.145);
 
 /// #96f5d9
 pub const HEALTH_HIGH: Color = Color::srgb(0.588, 0.961, 0.851);
