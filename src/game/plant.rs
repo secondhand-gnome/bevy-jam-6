@@ -36,7 +36,6 @@ pub(super) fn plugin(app: &mut App) {
     app.add_event::<SpewFireEvent>();
 
     // TODO make fireballs damage enemies
-    // TODO despawn fireballs
     app.add_systems(
         Update,
         (
