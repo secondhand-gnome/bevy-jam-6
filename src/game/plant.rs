@@ -37,10 +37,10 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(Update, (draw_plant_circles, draw_growth, draw_health));
 }
 
-fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
+fn plant(position: Vec2, plant_assets: &PlantAssets, plant_type: PlantType) -> impl Bundle {
     (
         Name::new(format!("Plant at {:?}", position)),
-        Plant,
+        Plant { plant_type },
         RigidBody::Static,
         Collider::circle(PLANT_RADIUS_PX),
         CollisionLayers::new([GameLayer::Plant], [GameLayer::Plant, GameLayer::Enemy]),
@@ -56,7 +56,9 @@ fn plant(position: Vec2, plant_assets: &PlantAssets) -> impl Bundle {
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
-pub struct Plant; // TODO require a plant type
+pub struct Plant {
+    plant_type: PlantType,
+}
 
 #[derive(Component, Debug, Clone, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
@@ -81,7 +83,7 @@ pub struct PlantAssets {
     death_sound: Handle<AudioSource>,
 }
 
-#[derive(Default, Debug, Clone, Copy)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Reflect)]
 pub enum PlantType {
     #[default]
     Daisy,
@@ -175,7 +177,7 @@ fn sow_plants(
             "Plant ({:?}) spawned at {:?}",
             event.seed_type, event.position
         );
-        commands.spawn(plant(event.position, &plant_assets));
+        commands.spawn(plant(event.position, &plant_assets, event.seed_type));
 
         let rng = &mut rand::thread_rng();
         let random_sow_sound = plant_assets.sow_sounds.choose(rng).unwrap().clone();
@@ -248,11 +250,11 @@ fn draw_health(mut painter: ShapePainter, q_plants: Query<(&Transform, &Health),
 
 fn tick_growth(
     mut commands: Commands,
-    mut q_growing_plants: Query<(Entity, &mut Transform, &mut GrowthTimer)>,
+    mut q_growing_plants: Query<(Entity, &Plant, &mut Transform, &mut GrowthTimer)>,
     time: Res<Time>,
     plant_assets: Res<PlantAssets>,
 ) {
-    for (entity, mut transform, mut growth_timer) in &mut q_growing_plants {
+    for (entity, plant, mut transform, mut growth_timer) in &mut q_growing_plants {
         growth_timer.0.tick(time.delta());
         if growth_timer.0.finished() {
             commands
@@ -260,12 +262,19 @@ fn tick_growth(
                 .remove::<GrowthTimer>()
                 .remove::<Sprite>()
                 .insert(Sprite {
-                    // TODO check plant type
-                    image: plant_assets.daisy.clone(),
+                    image: match plant.plant_type {
+                        PlantType::Daisy => plant_assets.daisy.clone(),
+                        PlantType::Pineapple => plant_assets.pineapple.clone(),
+                        PlantType::Dragonfruit => plant_assets.dragonfruit.clone(),
+                    },
+                    custom_size: match plant.plant_type {
+                        PlantType::Daisy => None,
+                        PlantType::Pineapple => Some(Vec2::splat(64.)),
+                        PlantType::Dragonfruit => Some(Vec2::splat(64.)),
+                    },
                     ..default()
                 });
 
-            // TODO check plant type
             transform.scale = Vec3::splat(0.5);
 
             commands.spawn((
