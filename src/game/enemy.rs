@@ -5,7 +5,9 @@ use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
-use crate::game::plant::{DamagePlantEvent, PINEAPPLE_STRENGTH, Plant, PlantType};
+use crate::game::plant::{
+    DRAGONFRUIT_STRENGTH, DamagePlantEvent, PINEAPPLE_STRENGTH, Plant, PlantType,
+};
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
 use avian2d::prelude::*;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
@@ -261,7 +263,17 @@ fn pursue_plants(
                         ));
                     }
                     PlantType::Dragonfruit => {
-                        // TODO dragonfruit damage
+                        // Enemy takes damage
+                        damage_enemy_events.write(DamageEnemyEvent {
+                            enemy_entity: enemy,
+                            amount: DRAGONFRUIT_STRENGTH,
+                        });
+
+                        // TODO chain reaction - fire
+                        commands.spawn((
+                            sound_effect(enemy_assets.rat_damage_sound.clone()),
+                            Transform::from_translation(enemy_transform.translation),
+                        ));
                     }
                 }
 
