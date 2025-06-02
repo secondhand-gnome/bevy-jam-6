@@ -2,7 +2,7 @@
 
 use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
-use crate::audio::sound_effect;
+use crate::game::player_animation::PlayerAnimation;
 use bevy::input::common_conditions::*;
 use bevy::window::PrimaryWindow;
 use bevy::{
@@ -10,7 +10,6 @@ use bevy::{
     prelude::*,
 };
 use bevy_vector_shapes::prelude::*;
-use rand::prelude::SliceRandom;
 
 const PLAYER_THROW_RADIUS_PX: f32 = 240.;
 
@@ -30,7 +29,7 @@ pub(super) fn plugin(app: &mut App) {
 
     app.add_systems(
         Update,
-        (draw_player_circle, animate_throw_seed).run_if(resource_exists::<PlayerAssets>),
+        (draw_player_circle).run_if(resource_exists::<PlayerAssets>),
     );
 }
 
@@ -43,8 +42,7 @@ pub fn player(
     // You can learn more in this example: https://github.com/bevyengine/bevy/blob/latest/examples/2d/texture_atlas.rs
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(64), 3, 1, Some(UVec2::splat(1)), None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
-    // let player_animation = PlayerAnimation::new();
-
+    let player_animation = PlayerAnimation::new();
     (
         Name::new("Player"),
         Player,
@@ -52,11 +50,12 @@ pub fn player(
             image: player_assets.farmer.clone(),
             texture_atlas: Some(TextureAtlas {
                 layout: texture_atlas_layout,
-                index: 0, // TODO change index based on player moving left/right
+                index: player_animation.frame(),
             }),
             ..default()
         },
         Transform::from_translation(Vec3::new(-350.0, 0.0, 1.0)),
+        player_animation,
     )
 }
 
@@ -70,7 +69,7 @@ pub struct PlayerAssets {
     #[dependency]
     farmer: Handle<Image>,
     #[dependency]
-    throw_sounds: Vec<Handle<AudioSource>>,
+    pub throw_sounds: Vec<Handle<AudioSource>>,
 }
 
 #[derive(Event, Debug, Default)]
@@ -160,22 +159,5 @@ fn draw_player_circle(mut painter: ShapePainter, q_player: Query<&Transform, Wit
         painter.hollow = true;
         painter.thickness = 1.0;
         painter.circle(PLAYER_THROW_RADIUS_PX);
-    }
-}
-
-fn animate_throw_seed(
-    mut commands: Commands,
-    mut events: EventReader<ThrowSeedEvent>,
-    player_assets: Res<PlayerAssets>,
-) {
-    // TODO if player not thrower, don't handle event
-    // TODO animate throw
-    for ev in events.read() {
-        let rng = &mut rand::thread_rng();
-        let throw_sound = player_assets.throw_sounds.choose(rng).unwrap().clone();
-        commands.spawn((
-            sound_effect(throw_sound),
-            Transform::from_translation(ev.origin.extend(0.)),
-        ));
     }
 }
