@@ -61,11 +61,5 @@ pub fn spawn_level(
         widget::ui_root("In Game UI"),
         GlobalZIndex(2),
         StateScoped(Screen::Gameplay),
-        children![widget::button("Daisy", select_daisy)],
     ));
 }
-
-fn select_daisy(_: Trigger<Pointer<Click>>) {
-    info!("Select plant Daisy");
-}
-

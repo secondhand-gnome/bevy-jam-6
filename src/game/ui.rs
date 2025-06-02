@@ -10,10 +10,7 @@ pub(super) fn plugin(app: &mut App) {
 pub fn build_ui(
     mut commands: Commands,
     mut scene_builder: SceneBuilder,
-    plant_assets: Res<PlantAssets>,
 ) {
-    let seed_types = vec![PlantType::Daisy];
-
     commands
         .ui_root()
         .spawn_scene(("ui/hello.cobweb", "scene"), &mut scene_builder, |h| {
