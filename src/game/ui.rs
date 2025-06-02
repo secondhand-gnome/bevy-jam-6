@@ -1,4 +1,4 @@
-use crate::game::plant::{PlantAssets, PlantType};
+use crate::game::plant::{PlantType, SeedSelection};
 use bevy::prelude::*;
 use bevy_cobweb::prelude::*;
 use bevy_cobweb_ui::prelude::*;
@@ -52,14 +52,3 @@ pub fn build_ui(
 
 // TODO hide UI on exit
 
-#[derive(ReactComponent, Default)]
-struct SeedSelection {
-    seed_type: PlantType,
-}
-
-impl SeedSelection {
-    fn set_seed_type(&mut self, seed_type: PlantType) {
-        info!("Set seed type to {:?}", seed_type);
-        self.seed_type = seed_type;
-    }
-}

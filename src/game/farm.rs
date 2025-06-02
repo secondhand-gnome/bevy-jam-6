@@ -1,10 +1,11 @@
 use crate::asset_tracking::LoadResource;
 use crate::game::enemy::enemy_spawner;
-use crate::game::plant::{Plant, SowPlantEvent, plant_collision_check};
+use crate::game::plant::{Plant, SeedSelection, SowPlantEvent, plant_collision_check};
 use crate::game::player::{Player, PlayerClickEvent, ThrowSeedEvent, can_player_reach};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy::sprite::SpriteImageMode::Tiled;
+use bevy_cobweb::prelude::Reactive;
 use bevy_vector_shapes::prelude::*;
 
 const TILE_SIZE_PX: f32 = 128.;
@@ -111,12 +112,16 @@ fn on_player_click(
     mut sow_events: EventWriter<SowPlantEvent>,
     mut throw_seed_events: EventWriter<ThrowSeedEvent>,
     q_player: Query<&Transform, With<Player>>,
+    q_seed_selection: Reactive<SeedSelection>,
     q_farm: Query<&Farm>,
     q_plants: Query<&Transform, With<Plant>>,
 ) {
     if q_farm.single().is_ok() {
         for click_event in click_events.read() {
             let click_position = click_event.0;
+
+            let (_, seed_selection) = q_seed_selection.single();
+            let seed_type = seed_selection.seed_type();
 
             let mut can_sow = true;
 
@@ -148,6 +153,7 @@ fn on_player_click(
                 // TODO don't actually sow until seed hits the ground
                 sow_events.write(SowPlantEvent {
                     position: click_position,
+                    seed_type,
                 });
 
                 // TODO handle multiple throws in a chain

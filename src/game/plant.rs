@@ -7,6 +7,7 @@ use crate::theme::palette::{PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE, PLANT
 use avian2d::prelude::{Collider, CollisionLayers, RigidBody};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
+use bevy_cobweb::prelude::*;
 use bevy_vector_shapes::painter::ShapePainter;
 use bevy_vector_shapes::prelude::*;
 use rand::prelude::SliceRandom;
@@ -80,7 +81,7 @@ pub struct PlantAssets {
     death_sound: Handle<AudioSource>,
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone, Copy)]
 pub enum PlantType {
     #[default]
     Daisy,
@@ -88,10 +89,26 @@ pub enum PlantType {
     Dragonfruit,
 }
 
+#[derive(ReactComponent, Default, Clone, Copy)]
+pub struct SeedSelection {
+    seed_type: PlantType,
+}
+
+impl SeedSelection {
+    pub fn set_seed_type(&mut self, seed_type: PlantType) {
+        info!("Set seed type to {:?}", seed_type);
+        self.seed_type = seed_type;
+    }
+
+    pub fn seed_type(&self) -> PlantType {
+        self.seed_type
+    }
+}
+
 #[derive(Event, Debug, Default)]
 pub struct SowPlantEvent {
     pub position: Vec2,
-    // TODO plant type
+    pub seed_type: PlantType,
 }
 
 // TODO generalize for enemies as well
@@ -154,7 +171,10 @@ fn sow_plants(
     mut sow_events: EventReader<SowPlantEvent>,
 ) {
     for event in sow_events.read() {
-        println!("Plant spawned at {:?}", event.position);
+        println!(
+            "Plant ({:?}) spawned at {:?}",
+            event.seed_type, event.position
+        );
         commands.spawn(plant(event.position, &plant_assets));
 
         let rng = &mut rand::thread_rng();
