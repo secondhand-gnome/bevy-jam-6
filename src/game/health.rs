@@ -6,7 +6,6 @@ use bevy::prelude::*;
 use bevy_vector_shapes::painter::ShapePainter;
 use bevy_vector_shapes::prelude::RectPainter;
 
-
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Health>();
 
