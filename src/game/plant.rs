@@ -54,6 +54,7 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(Update, (draw_plant_circles, draw_growth));
 }
 
+// TODO a Gnome plant should spawn a Gnome entity at the same transform, which will handle throwing/catching
 fn plant(position: Vec2, plant_assets: &PlantAssets, plant_type: PlantType) -> impl Bundle {
     (
         Name::new(format!("Plant at {:?}", position)),
