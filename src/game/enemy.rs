@@ -5,9 +5,7 @@ use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
-use crate::game::plant::{
-    DRAGONFRUIT_STRENGTH, DamagePlantEvent, PINEAPPLE_STRENGTH, Plant, PlantType, SpewFireEvent,
-};
+use crate::game::plant::{DRAGONFRUIT_STRENGTH, DamagePlantEvent, PINEAPPLE_STRENGTH, Plant, PlantType, SpewFireEvent, Burnable};
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
 use avian2d::prelude::*;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
@@ -68,6 +66,7 @@ fn enemy(spawn_position: Vec3, enemy_assets: &EnemyAssets) -> impl Bundle {
             image: enemy_assets.rat.clone(),
             ..default()
         },
+        Burnable,
         Health::new(ENEMY_MAX_HEALTH),
         Transform::from_translation(spawn_position),
         children![(
@@ -303,14 +302,6 @@ fn pursue_plants(
             // TODO use A* pathfinding here
             *enemy_velocity = LinearVelocity(ENEMY_MOVE_SPEED * plant_vector.xy().normalize());
         }
-
-        // const ENEMY_VISION_RADIUS: f32 = 2000.;
-        // let intersections = spatial_query.shape_intersections(
-        //     &Collider::circle(ENEMY_VISION_RADIUS),
-        //     enemy_transform.translation.xy(),
-        //     0.,
-        //     &SpatialQueryFilter::from_mask(GameLayer::Plant.to_bits()),
-        // );
     }
 }
 

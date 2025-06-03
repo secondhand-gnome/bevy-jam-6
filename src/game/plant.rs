@@ -4,13 +4,17 @@ use crate::audio::sound_effect;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
 use crate::theme::palette::{PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
-use avian2d::prelude::{Collider, CollisionLayers, LinearVelocity, RigidBody};
+use avian2d::prelude::{
+    Collider, CollisionEventsEnabled, CollisionLayers, CollisionStarted, LinearVelocity,
+    PhysicsLayer, RigidBody, SpatialQuery, SpatialQueryFilter,
+};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy_cobweb::prelude::*;
 use bevy_vector_shapes::painter::ShapePainter;
 use bevy_vector_shapes::prelude::*;
 use rand::prelude::SliceRandom;
+use std::cmp::Ordering;
 
 const PLANT_RADIUS_PX: f32 = 30.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
@@ -24,6 +28,7 @@ const FIREBALL_RADIUS_PX: f32 = 30.;
 const FIREBALL_START_OFFSET_PX: f32 = 40.;
 const FIREBALL_LIFETIME_S: f32 = 1.0;
 const FIREBALL_MOVE_SPEED: f32 = 15.0;
+const FIREBALL_DAMAGE: i32 = 2;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Plant>();
@@ -44,6 +49,7 @@ pub(super) fn plugin(app: &mut App) {
             tick_growth,
             spew_fire,
             tick_fireball_lifetime,
+            burn_stuff,
         )
             .run_if(resource_exists::<PlantAssets>)
             .in_set(PausableSystems),
@@ -80,6 +86,7 @@ fn fireball(
         RigidBody::Kinematic,
         Collider::circle(FIREBALL_RADIUS_PX),
         CollisionLayers::new([GameLayer::Fireball], [GameLayer::Enemy]), // TODO also interact with plants
+        CollisionEventsEnabled,
         Sprite {
             image: plant_assets.fireball.clone(),
             ..default()
@@ -114,6 +121,10 @@ struct GrowthTimer(Timer);
 pub struct Fireball {
     spawning_entity: Entity,
 }
+
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Reflect)]
+#[reflect(Component)]
+pub struct Burnable;
 
 #[derive(Component, Debug, Clone, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
@@ -346,6 +357,41 @@ fn tick_fireball_lifetime(
         if timer.0.just_finished() {
             commands.entity(entity).despawn();
         }
+    }
+}
+
+fn burn_stuff(
+    mut commands: Commands,
+    q_fireballs: Query<(Entity, &Transform), With<Fireball>>,
+    mut q_burnables: Query<(Entity, &mut Health, &Transform), With<Burnable>>,
+    mut collision_event_reader: EventReader<CollisionStarted>,
+    spatial_query: SpatialQuery,
+) {
+    if collision_event_reader.is_empty() {
+        return;
+    }
+    let fireball_entities: Vec<Entity> = q_fireballs.iter().map(|(e, _)| e).collect();
+    let burnable_entities: Vec<Entity> = q_burnables.iter().map(|(e, _, _)| e).collect();
+    for CollisionStarted(entity1, entity2) in collision_event_reader.read() {
+        let (fireball_entity, burnable_entity) =
+            if fireball_entities.contains(entity1) && burnable_entities.contains(entity2) {
+                (entity1, entity2)
+            } else if burnable_entities.contains(entity1) && fireball_entities.contains(entity2) {
+                (entity2, entity1)
+            } else {
+                continue;
+            };
+        let Some(mut burnable_health) = q_burnables
+            .iter_mut()
+            .find(|(e, _, _)| e == burnable_entity)
+            .map(|(_, h, _)| h)
+        else {
+            continue;
+        };
+        burnable_health.reduce(FIREBALL_DAMAGE);
+        commands.entity(*fireball_entity).despawn();
+
+        // TODO play sound and make smoke
     }
 }
 
