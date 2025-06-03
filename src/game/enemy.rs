@@ -286,6 +286,9 @@ fn pursue_plants(
                             Transform::from_translation(enemy_transform.translation),
                         ));
                     }
+                    PlantType::Gnome => {
+                        // TODO headbutt
+                    }
                 }
 
                 commands

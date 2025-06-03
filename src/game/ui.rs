@@ -44,6 +44,16 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                     },
                 );
             });
+            h.edit("seed_button_gnome", |h| {
+                h.on_pressed(
+                    move |mut c: Commands, mut seed_selection: ReactiveMut<SeedSelection>| {
+                        seed_selection
+                            .get_mut(&mut c, scene_entity)?
+                            .set_seed_type(PlantType::Gnome);
+                        OK
+                    },
+                );
+            });
         });
 }
 

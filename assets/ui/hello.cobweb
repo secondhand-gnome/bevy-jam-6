@@ -2,6 +2,7 @@
 $daisy_sprite = "images/plants/daisy.png"
 $dragonfruit_sprite = "images/plants/dragonfruit.png"
 $pineapple_sprite = "images/plants/pineapple.png"
+$gnome_sprite = "images/plants/gnome.png"
 
 +seed_item = \
     GridNode{ justify_main:Center justify_self_cross:Stretch }
@@ -21,7 +22,7 @@ $pineapple_sprite = "images/plants/pineapple.png"
 \
 
 #commands
-LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite]
+LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite, $gnome_sprite]
 
 #scenes
 "scene"
@@ -47,4 +48,11 @@ LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite]
         BackgroundColor(#4f5269)
             +seed_item{
                 LoadedImageNode{image:$dragonfruit_sprite}
+            }
+
+    "seed_button_gnome"
+        FlexNode{ margin:{top:4px left:4px}}
+        BackgroundColor(#4f5269)
+            +seed_item{
+                LoadedImageNode{image:$gnome_sprite}
             }

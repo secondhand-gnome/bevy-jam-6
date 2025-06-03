@@ -150,6 +150,8 @@ pub struct PlantAssets {
     #[dependency]
     seedling: Handle<Image>,
     #[dependency]
+    gnome: Handle<Image>,
+    #[dependency]
     fireball: Handle<Image>,
     #[dependency]
     sow_sounds: Vec<Handle<AudioSource>>,
@@ -169,6 +171,7 @@ pub enum PlantType {
     Daisy,
     Pineapple,
     Dragonfruit,
+    Gnome,
 }
 
 #[derive(ReactComponent, Default, Clone, Copy)]
@@ -237,6 +240,13 @@ impl FromWorld for PlantAssets {
             ),
             seedling: assets.load_with_settings(
                 "images/plants/seedling.png",
+                |settings: &mut ImageLoaderSettings| {
+                    // Use `nearest` image sampling to preserve pixel art style.
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+            gnome: assets.load_with_settings(
+                "images/plants/gnome.png",
                 |settings: &mut ImageLoaderSettings| {
                     // Use `nearest` image sampling to preserve pixel art style.
                     settings.sampler = ImageSampler::nearest();
@@ -337,11 +347,13 @@ fn tick_growth(
                         PlantType::Daisy => plant_assets.daisy.clone(),
                         PlantType::Pineapple => plant_assets.pineapple.clone(),
                         PlantType::Dragonfruit => plant_assets.dragonfruit.clone(),
+                        PlantType::Gnome => plant_assets.gnome.clone(),
                     },
                     custom_size: match plant.plant_type {
                         PlantType::Daisy => None,
                         PlantType::Pineapple => Some(Vec2::splat(64.)),
                         PlantType::Dragonfruit => Some(Vec2::splat(64.)),
+                        PlantType::Gnome => Some(Vec2::splat(64.)),
                     },
                     ..default()
                 });
