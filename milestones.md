@@ -23,7 +23,7 @@
 - [x] Background Music
 - [x] Select a plant type before throwing a seed
 - [x] Enemies die at 0 health
-- [ ] A Pineapple plant inflicts damage when stepped on, knocking enemy back with an immunity grace period
+- [x] A Pineapple plant inflicts damage when stepped on
 - [x] A Dragonfruit plant inflicts damage when adjacent to an enemy
 
 ## Milestone 4
