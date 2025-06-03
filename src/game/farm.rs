@@ -15,8 +15,11 @@ const FARM_SIZE_PX: Vec2 = Vec2::new(
     FARM_SIZE_TILES.y * TILE_SIZE_PX,
 );
 
+const STARTING_BALANCE: f32 = 10.0;
+
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Farm>();
+    app.add_event::<BankAccountUpdateEvent>();
 
     app.register_type::<FarmAssets>();
     app.load_resource::<FarmAssets>();
@@ -28,6 +31,7 @@ pub fn farm(farm_assets: &FarmAssets) -> impl Bundle {
     (
         Name::new("Farm"),
         Farm,
+        BankAccount { balance: STARTING_BALANCE },
         Sprite {
             image: farm_assets.grass_a.clone(),
             image_mode: Tiled {
@@ -60,6 +64,25 @@ pub struct FarmAssets {
     dirt_a: Handle<Image>,
     #[dependency]
     dirt_b: Handle<Image>,
+}
+
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Reflect)]
+#[reflect(Component)]
+struct BankAccount {
+    balance: f32,
+}
+
+#[derive(Event, Debug, Default)]
+pub struct BankAccountUpdateEvent;
+
+impl BankAccount {
+    fn balance(&self) -> f32 {
+        self.balance
+    }
+
+    fn deduct(&mut self, amount: f32) {
+        self.balance -= amount;
+    }
 }
 
 impl FromWorld for FarmAssets {
@@ -115,6 +138,8 @@ fn on_player_click(
     q_seed_selection: Reactive<SeedSelection>,
     q_farm: Query<&Farm>,
     q_plants: Query<&Transform, With<Plant>>,
+    mut q_bank_account: Query<&mut BankAccount>,
+    mut bank_account_update_events: EventWriter<BankAccountUpdateEvent>,
 ) {
     if q_farm.single().is_ok() {
         for click_event in click_events.read() {
@@ -147,9 +172,21 @@ fn on_player_click(
                     can_sow = false;
                 }
             }
-            
-            // TODO make sure we have enough money
-            info!("To plant {:?} would cost {}", seed_type, seed_type.price());
+
+            let Ok(mut bank_account) = q_bank_account.single_mut() else {
+                warn!("No bank account!");
+                return;
+            };
+            info!(
+                "To plant {:?} would cost {}. We have {}",
+                seed_type,
+                seed_type.price(),
+                bank_account.balance()
+            );
+            if bank_account.balance() < seed_type.price() {
+                can_sow = false;
+                info!("Can't afford seed");
+            }
 
             if can_sow {
                 // Actually sow a plant
@@ -158,7 +195,9 @@ fn on_player_click(
                     position: click_position,
                     seed_type,
                 });
-                
+
+                bank_account.deduct(seed_type.price());
+                bank_account_update_events.write(BankAccountUpdateEvent);
 
                 // TODO handle multiple throws in a chain
                 throw_seed_events.write(ThrowSeedEvent {

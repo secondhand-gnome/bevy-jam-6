@@ -1,3 +1,4 @@
+use crate::game::farm::BankAccountUpdateEvent;
 use crate::game::plant::{PlantType, SeedSelection};
 use bevy::prelude::*;
 use bevy_cobweb::prelude::*;
@@ -7,7 +8,11 @@ pub(super) fn plugin(app: &mut App) {
     app.add_plugins(CobwebUiPlugin).load("ui/hello.cobweb");
 }
 
-pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
+pub fn build_ui(
+    mut commands: Commands,
+    mut scene_builder: SceneBuilder,
+    mut bank_account_update_events: EventReader<BankAccountUpdateEvent>,
+) {
     commands
         .ui_root()
         .spawn_scene(("ui/hello.cobweb", "scene"), &mut scene_builder, |h| {
@@ -58,3 +63,4 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
 }
 
 // TODO hide UI on exit
+// TODO update UI in response to BankAccountUpdate

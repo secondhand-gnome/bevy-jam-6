@@ -27,37 +27,42 @@ LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite, $gnome_sprite]
 
 #scenes
 "scene"
-    FlexNode{ padding:{top:8px bottom:8px left:8px right:8px}, margin:{top:8px left:8px} }
-    BackgroundColor(#bce7ff)
+    GridNode{ padding:{top:8px bottom:8px left:8px right:8px}, margin:{top:8px left:8px} }
 
-    "seed_button_daisy"
-        +seed_item{
-            "sprite"
-                LoadedImageNode{image:$daisy_sprite}
-            "text"
-                TextLine{ text:"Daisy $1" size:12 }
-        }
+    "seeds"
+        GridNode{ padding:{top:8px bottom:8px left:8px right:8px}, margin:{top:8px left:8px}  grid_template_columns: [(Count(4) auto)] }
+        BackgroundColor(#bce7ff)
+        "seed_button_daisy"
+            +seed_item{
+                "sprite"
+                    LoadedImageNode{image:$daisy_sprite}
+                "text"
+                    TextLine{ text:"Daisy $1" size:12 }
+            }
 
-    "seed_button_pineapple"
-        +seed_item{
-            "sprite"
-                LoadedImageNode{image:$pineapple_sprite}
-            "text"
-                TextLine{ text:"Pineapple $2" size:12 }
-        }
+        "seed_button_pineapple"
+            +seed_item{
+                "sprite"
+                    LoadedImageNode{image:$pineapple_sprite}
+                "text"
+                    TextLine{ text:"Pineapple $2" size:12 }
+            }
 
-    "seed_button_dragonfruit"
-        +seed_item{
-            "sprite"
-                LoadedImageNode{image:$dragonfruit_sprite}
-            "text"
-                TextLine{ text:"Dragonfruit $3" size:12 }
-        }
+        "seed_button_dragonfruit"
+            +seed_item{
+                "sprite"
+                    LoadedImageNode{image:$dragonfruit_sprite}
+                "text"
+                    TextLine{ text:"Dragonfruit $3" size:12 }
+            }
 
-    "seed_button_gnome"
-        +seed_item{
-            "sprite"
-                LoadedImageNode{image:$gnome_sprite}
-            "text"
-                TextLine{ text:"Gnome $5" size:12 }
-        }
+        "seed_button_gnome"
+            +seed_item{
+                "sprite"
+                    LoadedImageNode{image:$gnome_sprite}
+                "text"
+                    TextLine{ text:"Gnome $5" size:12 }
+            }
+
+    "bank"
+        TextLine{text:"Bank balance: $10/$150"}
