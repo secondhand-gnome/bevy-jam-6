@@ -5,7 +5,10 @@ use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
-use crate::game::plant::{DRAGONFRUIT_STRENGTH, DamagePlantEvent, PINEAPPLE_STRENGTH, Plant, PlantType, SpewFireEvent, Burnable};
+use crate::game::plant::{
+    Burnable, DRAGONFRUIT_STRENGTH, DamagePlantEvent, PINEAPPLE_STRENGTH, Plant, PlantType,
+    SpewFireEvent,
+};
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
 use avian2d::prelude::*;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
@@ -61,7 +64,10 @@ fn enemy(spawn_position: Vec3, enemy_assets: &EnemyAssets) -> impl Bundle {
         Enemy,
         RigidBody::Kinematic,
         Collider::circle(ENEMY_RADIUS),
-        CollisionLayers::new([GameLayer::Enemy], [GameLayer::Plant, GameLayer::Enemy]),
+        CollisionLayers::new(
+            [GameLayer::Enemy],
+            [GameLayer::Plant, GameLayer::Enemy, GameLayer::Fireball],
+        ),
         Sprite {
             image: enemy_assets.rat.clone(),
             ..default()
@@ -338,7 +344,10 @@ fn damage_enemies(
         for (entity, mut health) in q_enemies.iter_mut() {
             if entity == ev.enemy_entity {
                 health.reduce(ev.amount);
-                info!("Damage enemy {:?} for {}", entity, ev.amount);
+                info!(
+                    "Damage enemy {:?} for {} (now at {:?})",
+                    entity, ev.amount, health
+                );
             }
         }
     }

@@ -24,10 +24,11 @@
 - [x] Select a plant type before throwing a seed
 - [x] Enemies die at 0 health
 - [ ] A Pineapple plant inflicts damage when stepped on, knocking enemy back with an immunity grace period
-- [ ] A Dragonfruit plant inflicts damage when adjacent to an enemy
+- [x] A Dragonfruit plant inflicts damage when adjacent to an enemy
 
 ## Milestone 4
 
+- [ ] Enemies retreat once all the plants are gone
 - [ ] A Leshy plant headbutts nearby enemies
 - [ ] A Leshy can catch, throw, and plant seeds
 
