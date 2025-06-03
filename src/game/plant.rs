@@ -18,8 +18,8 @@ const PLANT_RADIUS_PX: f32 = 30.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
 const PLANT_MAX_HEALTH: i32 = 5; // TODO depends on plant type
 
+pub const GNOME_STRENGTH: i32 = 1;
 pub const PINEAPPLE_STRENGTH: i32 = 2;
-
 pub const DRAGONFRUIT_STRENGTH: i32 = 1;
 
 const FIREBALL_RADIUS_PX: f32 = 30.;
@@ -424,11 +424,12 @@ fn burn_stuff(
             continue;
         };
 
+        // TODO write a DamageEnemyEvent instead of directly affecting health here
         burnable_health.reduce(FIREBALL_DAMAGE);
         commands.entity(*fireball_entity).despawn();
         fireball.deactivate();
 
-        // TODO play sound and make smoke
+        // TODO make smoke
         commands.spawn((
             sound_effect(plant_assets.burn_sound.clone()),
             // TODO transform
