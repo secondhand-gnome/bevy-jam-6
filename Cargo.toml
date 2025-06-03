@@ -1,7 +1,7 @@
 [package]
 name = "bevy-jam-6"
 authors = ["Austin Almond <aust.almond@gmail.com>"]
-version = "0.1.7"
+version = "0.1.8"
 edition = "2024"
 
 [dependencies]
@@ -32,15 +32,12 @@ bevy_cobweb = "0.17.0"
 [target.wasm32-unknown-unknown.dependencies]
 getrandom = { version = "0.3", features = ["wasm_js"] }
 
-# It's recommended to set the flag on a per-target basis:
-[target.wasm32-unknown-unknown]
-rustflags = ['--cfg', 'getrandom_backend="wasm_js"']
 # In addition to enabling the `wasm_js` feature, you need to include `--cfg 'getrandom_backend="wasm_js"'`
 # in your rustflags for both local and CI/CD web builds, taking into account that rustflags specified in
 # multiple places are NOT combined (see <https://github.com/rust-lang/cargo/issues/5376>).
 # Alternatively, you can opt out of the rustflags check with this patch:
-#[patch.crates-io]
-#getrandom = { git = "https://github.com/benfrankel/getrandom" }
+[patch.crates-io]
+getrandom = { git = "https://github.com/benfrankel/getrandom" }
 
 [features]
 # Default to a native dev build.
