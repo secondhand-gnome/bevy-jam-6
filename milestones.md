@@ -29,12 +29,12 @@
 ## Milestone 4
 
 - [ ] Enemies retreat once all the plants are gone
-- [ ] A Leshy plant headbutts nearby enemies
-- [ ] A Leshy can catch, throw, and plant seeds
+- [ ] A Gnome plant headbutts nearby enemies
+- [ ] A Gnome can catch, throw, and plant seeds
 
 ## Milestone 5 (MVP)
 
-- [ ] harvest 3 daisies in a row to make a Daisy Chain. A nearby Leshy will throw it to you.
+- [ ] harvest 3 daisies in a row to make a Daisy Chain. A nearby Gnome will throw it to you.
 - [ ] Sell a Daisy Chain for money
 - [ ] Spend money on seedlings (they are no longer free)
 - [ ] Win condition: $150
