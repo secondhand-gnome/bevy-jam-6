@@ -28,6 +28,11 @@ const FIREBALL_LIFETIME_S: f32 = 1.0;
 const FIREBALL_MOVE_SPEED: f32 = 15.0;
 const FIREBALL_DAMAGE: i32 = 2;
 
+const DAISY_PRICE: f32 = 1.;
+const PINEAPPLE_PRICE: f32 = 2.;
+const DRAGONFRUIT_PRICE: f32 = 3.;
+const GNOME_PRICE: f32 = 5.;
+
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Plant>();
 
@@ -172,6 +177,17 @@ pub enum PlantType {
     Pineapple,
     Dragonfruit,
     Gnome,
+}
+
+impl PlantType {
+    pub fn price(&self) -> f32 {
+        match self {
+            PlantType::Daisy => DAISY_PRICE,
+            PlantType::Pineapple => PINEAPPLE_PRICE,
+            PlantType::Dragonfruit => DRAGONFRUIT_PRICE,
+            PlantType::Gnome => GNOME_PRICE,
+        }
+    }
 }
 
 #[derive(ReactComponent, Default, Clone, Copy)]

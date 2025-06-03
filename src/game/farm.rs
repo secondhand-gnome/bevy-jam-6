@@ -147,6 +147,9 @@ fn on_player_click(
                     can_sow = false;
                 }
             }
+            
+            // TODO make sure we have enough money
+            info!("To plant {:?} would cost {}", seed_type, seed_type.price());
 
             if can_sow {
                 // Actually sow a plant
@@ -155,6 +158,7 @@ fn on_player_click(
                     position: click_position,
                     seed_type,
                 });
+                
 
                 // TODO handle multiple throws in a chain
                 throw_seed_events.write(ThrowSeedEvent {
