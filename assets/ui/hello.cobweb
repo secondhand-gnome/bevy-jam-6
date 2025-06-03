@@ -5,24 +5,25 @@ $pineapple_sprite = "images/plants/pineapple.png"
 $gnome_sprite = "images/plants/gnome.png"
 
 +seed_item = \
-    GridNode{ justify_main:Center justify_self_cross:Stretch }
-    GridColumn{ span:1 }
+    GridNode{ justify_main:Center justify_self_cross:Stretch width:96px height:86px }
     Splat<Border>(1px)
-    Splat<Padding>(20px)
-    Splat<Margin>(5px)
+    Splat<Margin>(2px)
     BrRadius(5px)
     BorderColor(#1c1b44)
     Responsive<BackgroundColor>{ idle:#4f5269 hover:#96f5d9 press:#6eced4 }
 
-    LoadedImageNode{image:$daisy_sprite}
+    "sprite"
+        FlexNode{ justify_main:Center justify_self_cross:Stretch width:48px height:48px margin:{top:8px left:8px right:8px}}
+        LoadedImageNode{image:$daisy_sprite}
 
     "text"
-        FlexNode
-        TextLine{ text:"" size:30 }
+        FlexNode{ justify_main:Center justify_self_cross:Stretch margin:{top:8px}}
+        TextLine{ text:"Text" size:12 }
 \
 
 #commands
 LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite, $gnome_sprite]
+// TODO fonts
 
 #scenes
 "scene"
@@ -30,29 +31,33 @@ LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite, $gnome_sprite]
     BackgroundColor(#bce7ff)
 
     "seed_button_daisy"
-        FlexNode{ margin:{top:4px left:4px}}
-        BackgroundColor(#4f5269)
-            +seed_item{
+        +seed_item{
+            "sprite"
                 LoadedImageNode{image:$daisy_sprite}
-            }
+            "text"
+                TextLine{ text:"Daisy $1" size:12 }
+        }
 
     "seed_button_pineapple"
-        FlexNode{ margin:{top:4px left:4px} }
-        BackgroundColor(#4f5269)
-            +seed_item{
+        +seed_item{
+            "sprite"
                 LoadedImageNode{image:$pineapple_sprite}
-            }
+            "text"
+                TextLine{ text:"Pineapple $2" size:12 }
+        }
 
     "seed_button_dragonfruit"
-        FlexNode{ margin:{top:4px left:4px}}
-        BackgroundColor(#4f5269)
-            +seed_item{
+        +seed_item{
+            "sprite"
                 LoadedImageNode{image:$dragonfruit_sprite}
-            }
+            "text"
+                TextLine{ text:"Dragonfruit $3" size:12 }
+        }
 
     "seed_button_gnome"
-        FlexNode{ margin:{top:4px left:4px}}
-        BackgroundColor(#4f5269)
-            +seed_item{
+        +seed_item{
+            "sprite"
                 LoadedImageNode{image:$gnome_sprite}
-            }
+            "text"
+                TextLine{ text:"Gnome $5" size:12 }
+        }
