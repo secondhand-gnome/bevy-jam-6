@@ -65,4 +65,7 @@ LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite, $gnome_sprite]
             }
 
     "bank"
-        TextLine{text:"Bank balance: $10/$150"}
+        TextLine{text:"Bank balance: $10"}
+        
+    "endgame"
+        TextLine{text:"Collect $150 to win"}

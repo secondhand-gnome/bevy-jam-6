@@ -1,18 +1,20 @@
-use crate::game::farm::BankAccountUpdateEvent;
+use crate::game::farm::{BankAccount, BankAccountUpdateEvent};
 use crate::game::plant::{PlantType, SeedSelection};
 use bevy::prelude::*;
+use bevy::time::common_conditions;
 use bevy_cobweb::prelude::*;
 use bevy_cobweb_ui::prelude::*;
+use std::time::Duration;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins(CobwebUiPlugin).load("ui/hello.cobweb");
+
+    app.add_systems(Update, update_ui);
 }
 
-pub fn build_ui(
-    mut commands: Commands,
-    mut scene_builder: SceneBuilder,
-    mut bank_account_update_events: EventReader<BankAccountUpdateEvent>,
-) {
+struct BalanceUpdate;
+
+pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
     commands
         .ui_root()
         .spawn_scene(("ui/hello.cobweb", "scene"), &mut scene_builder, |h| {
@@ -59,8 +61,29 @@ pub fn build_ui(
                     },
                 );
             });
+
+            h.get("bank").update_on(
+                broadcast::<BalanceUpdate>(),
+                move |id: TargetId, mut editor: TextEditor, q_bank_account: Query<&BankAccount>| {
+                    let Ok(bank_account) = q_bank_account.single() else {
+                        warn!("No bank account");
+                        return;
+                    };
+                    let balance = bank_account.balance();
+                    write_text!(editor, *id, "Bank balance: ${}", balance);
+                    info!("Update UI for bank account balance {:?}", balance);
+                },
+            );
         });
 }
 
 // TODO hide UI on exit
-// TODO update UI in response to BankAccountUpdate
+
+fn update_ui(
+    mut commands: Commands,
+    mut bank_account_update_events: EventReader<BankAccountUpdateEvent>,
+) {
+    for _ in bank_account_update_events.read() {
+        commands.react().broadcast(BalanceUpdate);
+    }
+}

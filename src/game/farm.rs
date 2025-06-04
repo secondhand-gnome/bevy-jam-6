@@ -68,7 +68,7 @@ pub struct FarmAssets {
 
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Reflect)]
 #[reflect(Component)]
-struct BankAccount {
+pub struct BankAccount {
     balance: f32,
 }
 
@@ -76,7 +76,7 @@ struct BankAccount {
 pub struct BankAccountUpdateEvent;
 
 impl BankAccount {
-    fn balance(&self) -> f32 {
+    pub fn balance(&self) -> f32 {
         self.balance
     }
 
