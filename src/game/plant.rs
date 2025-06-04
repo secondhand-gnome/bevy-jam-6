@@ -18,6 +18,10 @@ const PLANT_RADIUS_PX: f32 = 30.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
 const PLANT_MAX_HEALTH: i32 = 5; // TODO depends on plant type
 
+const DAISY_CHAIN_LENGTH: usize = 3;
+// const DAISY_CHAIN_DISTANCE: f32 = 40.; // TODO use
+// const DAISY_CHAIN_VALUE: f32 = 10.; // TODO use
+
 pub const GNOME_STRENGTH: i32 = 1;
 pub const PINEAPPLE_STRENGTH: i32 = 2;
 pub const DRAGONFRUIT_STRENGTH: i32 = 1;
@@ -43,6 +47,7 @@ pub(super) fn plugin(app: &mut App) {
     app.add_event::<SowPlantEvent>();
     app.add_event::<DamagePlantEvent>();
     app.add_event::<SpewFireEvent>();
+    app.add_event::<SellDaisyChainEvent>();
 
     app.add_systems(
         Update,
@@ -53,6 +58,8 @@ pub(super) fn plugin(app: &mut App) {
             spew_fire,
             tick_fireball_lifetime,
             burn_stuff,
+            form_daisy_chains,
+            sell_daisy_chains,
         )
             .run_if(resource_exists::<PlantAssets>)
             .in_set(PausableSystems),
@@ -105,7 +112,6 @@ fn fireball(
         LinearVelocity(direction),
     )
 }
-// commands.spawn(fireball(ev.plant_entity, ev.origin, direction, LIFETIME_S));
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
@@ -223,6 +229,11 @@ pub struct DamagePlantEvent {
 pub struct SpewFireEvent {
     pub plant_entity: Entity,
     pub origin: Vec3,
+}
+
+#[derive(Event, Debug)]
+pub struct SellDaisyChainEvent {
+    daisy_entities: Vec<Entity>,
 }
 
 pub fn plant_collision_check(plant_position: Vec2, hit_position: Vec2) -> bool {
@@ -452,6 +463,42 @@ fn burn_stuff(
             // TODO transform
             // Transform::from_translation(event.position.extend(0.)),
         ));
+    }
+}
+
+fn form_daisy_chains(
+    q_plants: Query<(Entity, &Transform, &Plant)>,
+    mut sell_events: EventWriter<SellDaisyChainEvent>,
+) {
+    let daisies: Vec<_> = q_plants
+        .iter()
+        .filter(|(_, _, p)| p.plant_type == PlantType::Daisy)
+        .collect();
+
+    // Find 3 daisies next to each other
+    // TODO implement "closest triplet" algorithm
+    // TODO For now just pick any 3
+    if daisies.len() < DAISY_CHAIN_LENGTH {
+        return;
+    }
+    let daisy_entities: Vec<_> = daisies
+        .iter()
+        .map(|(e, _, _)| *e)
+        .take(DAISY_CHAIN_LENGTH)
+        .collect();
+    sell_events.write(SellDaisyChainEvent { daisy_entities });
+}
+
+fn sell_daisy_chains(mut commands: Commands, mut sell_events: EventReader<SellDaisyChainEvent>) {
+    for ev in sell_events.read() {
+        info!("Selling daisy chain: {:?}", ev.daisy_entities.iter());
+        for entity in ev.daisy_entities.iter() {
+            // TODO instead of despawn, mark as "Sold" and give it a short lifetime
+            // TODO enemies should ignore "Sold" daisies
+            commands.entity(*entity).despawn();
+        }
+        // TODO actually sell
+        // TODO sound, animation, particle effects
     }
 }
 
