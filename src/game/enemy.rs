@@ -5,7 +5,10 @@ use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
-use crate::game::plant::{Burnable, DRAGONFRUIT_STRENGTH, DamagePlantEvent, PINEAPPLE_STRENGTH, Plant, PlantType, SpewFireEvent, GNOME_STRENGTH};
+use crate::game::plant::{
+    Burnable, DRAGONFRUIT_STRENGTH, DamagePlantEvent, GNOME_STRENGTH, PINEAPPLE_STRENGTH, Plant,
+    PlantType, SpewFireEvent,
+};
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
 use avian2d::prelude::*;
 use bevy::image::{ImageLoaderSettings, ImageSampler};

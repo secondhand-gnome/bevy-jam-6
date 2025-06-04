@@ -31,7 +31,9 @@ pub fn farm(farm_assets: &FarmAssets) -> impl Bundle {
     (
         Name::new("Farm"),
         Farm,
-        BankAccount { balance: STARTING_BALANCE },
+        BankAccount {
+            balance: STARTING_BALANCE,
+        },
         Sprite {
             image: farm_assets.grass_a.clone(),
             image_mode: Tiled {

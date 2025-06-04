@@ -76,7 +76,7 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                     info!("Update UI for seed type {:?}", seed_type);
                 },
             );
-            
+
             h.get("bank").update_on(
                 broadcast::<BalanceUpdate>(),
                 move |id: TargetId, mut editor: TextEditor, q_bank_account: Query<&BankAccount>| {
