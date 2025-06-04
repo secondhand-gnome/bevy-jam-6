@@ -19,7 +19,7 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
             h.insert_reactive(SeedSelection::default());
             let scene_entity = h.id();
 
-            h.edit("seed_button_daisy", |h| {
+            h.edit("seeds::seed_button_daisy", |h| {
                 h.on_pressed(
                     move |mut c: Commands, mut seed_selection: ReactiveMut<SeedSelection>| {
                         seed_selection
@@ -29,7 +29,7 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                     },
                 );
             });
-            h.edit("seed_button_pineapple", |h| {
+            h.edit("seeds::seed_button_pineapple", |h| {
                 h.on_pressed(
                     move |mut c: Commands, mut seed_selection: ReactiveMut<SeedSelection>| {
                         seed_selection
@@ -39,7 +39,7 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                     },
                 );
             });
-            h.edit("seed_button_dragonfruit", |h| {
+            h.edit("seeds::seed_button_dragonfruit", |h| {
                 h.on_pressed(
                     move |mut c: Commands, mut seed_selection: ReactiveMut<SeedSelection>| {
                         seed_selection
@@ -49,7 +49,7 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                     },
                 );
             });
-            h.edit("seed_button_gnome", |h| {
+            h.edit("seeds::seed_button_gnome", |h| {
                 h.on_pressed(
                     move |mut c: Commands, mut seed_selection: ReactiveMut<SeedSelection>| {
                         seed_selection
