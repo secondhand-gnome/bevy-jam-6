@@ -85,6 +85,10 @@ impl BankAccount {
     fn deduct(&mut self, amount: f32) {
         self.balance -= amount;
     }
+
+    pub fn credit(&mut self, amount: f32) {
+        self.balance += amount;
+    }
 }
 
 impl FromWorld for FarmAssets {

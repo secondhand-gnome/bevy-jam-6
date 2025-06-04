@@ -1,6 +1,7 @@
 use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
+use crate::game::farm::{BankAccount, BankAccountUpdateEvent};
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
 use crate::theme::palette::{PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
@@ -20,7 +21,7 @@ const PLANT_MAX_HEALTH: i32 = 5; // TODO depends on plant type
 
 const DAISY_CHAIN_LENGTH: usize = 3;
 // const DAISY_CHAIN_DISTANCE: f32 = 40.; // TODO use
-// const DAISY_CHAIN_VALUE: f32 = 10.; // TODO use
+const DAISY_CHAIN_VALUE: f32 = 10.;
 
 pub const GNOME_STRENGTH: i32 = 1;
 pub const PINEAPPLE_STRENGTH: i32 = 2;
@@ -467,7 +468,7 @@ fn burn_stuff(
 }
 
 fn form_daisy_chains(
-    q_plants: Query<(Entity, &Transform, &Plant)>,
+    q_plants: Query<(Entity, &Transform, &Plant), Without<GrowthTimer>>,
     mut sell_events: EventWriter<SellDaisyChainEvent>,
 ) {
     let daisies: Vec<_> = q_plants
@@ -489,7 +490,12 @@ fn form_daisy_chains(
     sell_events.write(SellDaisyChainEvent { daisy_entities });
 }
 
-fn sell_daisy_chains(mut commands: Commands, mut sell_events: EventReader<SellDaisyChainEvent>) {
+fn sell_daisy_chains(
+    mut commands: Commands,
+    mut sell_events: EventReader<SellDaisyChainEvent>,
+    mut q_bank_account: Query<&mut BankAccount>,
+    mut bank_account_update_events: EventWriter<BankAccountUpdateEvent>,
+) {
     for ev in sell_events.read() {
         info!("Selling daisy chain: {:?}", ev.daisy_entities.iter());
         for entity in ev.daisy_entities.iter() {
@@ -497,7 +503,12 @@ fn sell_daisy_chains(mut commands: Commands, mut sell_events: EventReader<SellDa
             // TODO enemies should ignore "Sold" daisies
             commands.entity(*entity).despawn();
         }
-        // TODO actually sell
+        let Ok(mut bank_account) = q_bank_account.single_mut() else {
+            warn!("No bank account!");
+            return;
+        };
+        bank_account.credit(DAISY_CHAIN_VALUE);
+        bank_account_update_events.write(BankAccountUpdateEvent);
         // TODO sound, animation, particle effects
     }
 }
