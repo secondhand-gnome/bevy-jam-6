@@ -11,6 +11,7 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 struct BalanceUpdate;
+struct CurrentSeedUpdate;
 
 pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
     commands
@@ -25,6 +26,7 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                         seed_selection
                             .get_mut(&mut c, scene_entity)?
                             .set_seed_type(PlantType::Daisy);
+                        c.react().broadcast(CurrentSeedUpdate);
                         OK
                     },
                 );
@@ -35,6 +37,7 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                         seed_selection
                             .get_mut(&mut c, scene_entity)?
                             .set_seed_type(PlantType::Pineapple);
+                        c.react().broadcast(CurrentSeedUpdate);
                         OK
                     },
                 );
@@ -45,6 +48,7 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                         seed_selection
                             .get_mut(&mut c, scene_entity)?
                             .set_seed_type(PlantType::Dragonfruit);
+                        c.react().broadcast(CurrentSeedUpdate);
                         OK
                     },
                 );
@@ -55,11 +59,24 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                         seed_selection
                             .get_mut(&mut c, scene_entity)?
                             .set_seed_type(PlantType::Gnome);
+                        c.react().broadcast(CurrentSeedUpdate);
                         OK
                     },
                 );
             });
 
+            h.get("current_seed").update_on(
+                broadcast::<CurrentSeedUpdate>(),
+                move |id: TargetId,
+                      mut editor: TextEditor,
+                      q_seed_selection: Reactive<SeedSelection>| {
+                    let (_, seed_selection) = q_seed_selection.single();
+                    let seed_type = seed_selection.seed_type();
+                    write_text!(editor, *id, "Current seed: {:?}", seed_type);
+                    info!("Update UI for seed type {:?}", seed_type);
+                },
+            );
+            
             h.get("bank").update_on(
                 broadcast::<BalanceUpdate>(),
                 move |id: TargetId, mut editor: TextEditor, q_bank_account: Query<&BankAccount>| {

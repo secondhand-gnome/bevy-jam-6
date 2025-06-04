@@ -63,6 +63,9 @@ LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite, $gnome_sprite]
                 "text"
                     TextLine{ text:"Gnome $5" size:12 }
             }
+            
+    "current_seed"
+        TextLine{text:"Current seed: ?"}
 
     "bank"
         TextLine{text:"Bank balance: $10"}
