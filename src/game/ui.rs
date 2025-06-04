@@ -1,10 +1,8 @@
 use crate::game::farm::{BankAccount, BankAccountUpdateEvent};
 use crate::game::plant::{PlantType, SeedSelection};
 use bevy::prelude::*;
-use bevy::time::common_conditions;
 use bevy_cobweb::prelude::*;
 use bevy_cobweb_ui::prelude::*;
-use std::time::Duration;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins(CobwebUiPlugin).load("ui/hello.cobweb");

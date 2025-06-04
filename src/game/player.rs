@@ -29,7 +29,7 @@ pub(super) fn plugin(app: &mut App) {
 
     app.add_systems(
         Update,
-        (draw_player_circle).run_if(resource_exists::<PlayerAssets>),
+        draw_player_circle.run_if(resource_exists::<PlayerAssets>),
     );
 }
 
