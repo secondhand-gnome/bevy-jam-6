@@ -2,7 +2,6 @@
 
 use crate::game::barn::{BarnAssets, barn};
 use crate::game::farm::{FarmAssets, farm};
-use crate::theme::widget;
 use crate::{
     asset_tracking::LoadResource,
     audio::music,
@@ -55,11 +54,5 @@ pub fn spawn_level(
                 music(level_assets.music.clone())
             ),
         ],
-    ));
-
-    commands.spawn((
-        widget::ui_root("In Game UI"),
-        GlobalZIndex(2),
-        StateScoped(Screen::Gameplay),
     ));
 }
