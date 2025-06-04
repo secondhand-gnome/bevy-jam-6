@@ -9,6 +9,7 @@ use crate::game::plant::{
     Burnable, DRAGONFRUIT_STRENGTH, DamagePlantEvent, GNOME_STRENGTH, PINEAPPLE_STRENGTH, Plant,
     PlantType, SpewFireEvent,
 };
+use crate::game::player::Player;
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
 use avian2d::prelude::*;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
@@ -18,6 +19,7 @@ use rand::Rng;
 use rand::prelude::SliceRandom;
 
 const ENEMY_RADIUS: f32 = 30.0;
+const ENEMY_DESPAWN_DISTANCE: f32 = 1500.0;
 const EAT_RADIUS_PX: f32 = 80.0;
 const SPAWN_INTERVAL_S: f32 = 1.0;
 const ENEMY_MOVE_SPEED: f32 = 240.0; // TODO tune down
@@ -165,6 +167,7 @@ fn tick_spawn(
     mut commands: Commands,
     q_enemy_spawners: Query<(&Transform, &mut SpawnTimer, &EnemySpawner)>,
     q_enemies: Query<&Enemy>,
+    q_plants: Query<&Plant>,
     time: Res<Time>,
     enemy_assets: Res<EnemyAssets>,
 ) {
@@ -174,6 +177,15 @@ fn tick_spawn(
         if spawn_timer.0.just_finished() {
             if q_enemies.iter().len() > ENEMY_SPAWN_LIMIT {
                 info!("Not spawning an enemy - limit reached");
+                return;
+            }
+            if q_plants
+                .iter()
+                .filter(|p| p.plant_type() == PlantType::Daisy)
+                .count()
+                == 0
+            {
+                info!("Not spawning an enemy - no daisies");
                 return;
             }
 
@@ -204,17 +216,23 @@ fn pursue_plants(
         With<Enemy>,
     >,
     q_plants: Query<(Entity, &Transform, &Plant)>,
+    q_player: Query<&Transform, With<Player>>,
     mut damage_plant_events: EventWriter<DamagePlantEvent>,
     mut damage_enemy_events: EventWriter<DamageEnemyEvent>,
     mut spew_fire_events: EventWriter<SpewFireEvent>,
     enemy_assets: Res<EnemyAssets>,
 ) {
+    let Ok(player_transform) = q_player.single() else {
+        return;
+    };
     for (enemy, enemy_transform, mut enemy_velocity, optional_bite_cooldown) in q_enemies.iter_mut()
     {
-        if q_plants.is_empty() {
-            // No plants - hold still
-            *enemy_velocity = LinearVelocity(Vec2::ZERO);
-            continue;
+        let dist_from_player =
+            (enemy_transform.translation - player_transform.translation).length();
+        if dist_from_player > ENEMY_DESPAWN_DISTANCE {
+            info!("Despawning enemy {:?} due to distance", enemy);
+            commands.entity(enemy).despawn();
+            return;
         }
 
         let mut plant_vectors: Vec<_> = q_plants
@@ -230,8 +248,9 @@ fn pursue_plants(
             .collect();
 
         if plant_vectors.is_empty() {
-            // No plants - hold still
-            *enemy_velocity = LinearVelocity(Vec2::ZERO);
+            // No plants - Move up
+            // TODO a* pathfinding
+            *enemy_velocity = LinearVelocity(ENEMY_MOVE_SPEED * Vec2::new(0., 1.));
             continue;
         }
 

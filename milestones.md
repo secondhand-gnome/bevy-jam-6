@@ -30,7 +30,7 @@
 
 - [x] A Gnome plant headbutts nearby enemies
 - [ ] A Gnome can catch, throw, and plant seeds
-- [ ] Enemies retreat once all the plants are gone
+- [x] Enemies retreat once all the plants are gone
 
 ## Milestone 5 (MVP)
 
