@@ -202,7 +202,7 @@ mod tests {
         let midpoints = vec![];
         let dest = IVec2::new(10, 10);
 
-        let path = throw_path(origin, midpoints, dest, 12.0, 0.0);
+        let path = throw_path(origin, midpoints, dest, 120.0, 0.0);
         assert!(path.is_some());
 
         let path = path.unwrap();
