@@ -10,6 +10,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_vector_shapes::prelude::*;
+use crate::theme::palette::PLAYER_THROW_OUTLINE;
 
 const PLAYER_THROW_RADIUS_PX: f32 = 240.;
 
@@ -155,6 +156,7 @@ fn window_to_world(position: Vec2, window: &Window, camera: &Transform) -> Vec2 
 
 fn draw_player_circle(mut painter: ShapePainter, q_player: Query<&Transform, With<Player>>) {
     if let Ok(player_pos) = q_player.single() {
+        painter.color = PLAYER_THROW_OUTLINE;
         painter.transform = *player_pos;
         painter.hollow = true;
         painter.thickness = 1.0;

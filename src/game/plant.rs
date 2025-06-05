@@ -4,7 +4,7 @@ use crate::audio::sound_effect;
 use crate::game::farm::{BankAccount, BankAccountUpdateEvent};
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
-use crate::theme::palette::{PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
+use crate::theme::palette::{GNOME_THROW_OUTLINE, PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
 use avian2d::prelude::{
     Collider, CollisionEventsEnabled, CollisionLayers, CollisionStarted, LinearVelocity, RigidBody,
 };
@@ -16,6 +16,7 @@ use bevy_vector_shapes::prelude::*;
 use rand::prelude::SliceRandom;
 
 const PLANT_RADIUS_PX: f32 = 30.;
+const GNOME_THROW_RADIUS_PX: f32 = 240.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
 const PLANT_MAX_HEALTH: i32 = 5; // TODO depends on plant type
 
@@ -65,10 +66,12 @@ pub(super) fn plugin(app: &mut App) {
             .run_if(resource_exists::<PlantAssets>)
             .in_set(PausableSystems),
     );
-    app.add_systems(Update, (draw_plant_circles, draw_growth));
+    app.add_systems(
+        Update,
+        (draw_plant_circles, draw_growth, draw_gnome_throw_circles),
+    );
 }
 
-// TODO a Gnome plant should spawn a Gnome entity at the same transform, which will handle throwing/catching
 fn plant(position: Vec2, plant_assets: &PlantAssets, plant_type: PlantType) -> impl Bundle {
     (
         Name::new(format!("Plant at {:?}", position)),
@@ -355,6 +358,23 @@ fn draw_growth(
             PROGRESS_DIMENS.x * progress,
             PROGRESS_DIMENS.y * 0.8,
         ));
+    }
+}
+
+fn draw_gnome_throw_circles(
+    mut painter: ShapePainter,
+    q_plants: Query<(&Transform, &Plant), Without<GrowthTimer>>,
+) {
+    let gnome_transforms = q_plants
+        .iter()
+        .filter(|(_, p)| p.plant_type() == PlantType::Gnome)
+        .map(|(t, _)| t);
+    for t in gnome_transforms {
+        painter.color = GNOME_THROW_OUTLINE;
+        painter.transform = *t;
+        painter.hollow = true;
+        painter.thickness = 1.0;
+        painter.circle(GNOME_THROW_RADIUS_PX);
     }
 }
 

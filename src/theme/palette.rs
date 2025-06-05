@@ -32,3 +32,9 @@ pub const HEALTH_HIGH: Color = Color::srgb(0.588, 0.961, 0.851);
 pub const HEALTH_MED: Color = Color::srgb(0.906, 0.765, 0.251);
 /// #db410e
 pub const HEALTH_LOW: Color = Color::srgb(0.859, 0.255, 0.055);
+
+/// #0d4d48
+pub const PLAYER_THROW_OUTLINE: Color = Color::srgb(0.051, 0.302, 0.282);
+
+/// #076237
+pub const GNOME_THROW_OUTLINE: Color = Color::srgb(0.027, 0.384, 0.216);
