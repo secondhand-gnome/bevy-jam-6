@@ -1,7 +1,13 @@
 use crate::asset_tracking::LoadResource;
 use crate::game::enemy::enemy_spawner;
-use crate::game::plant::{Plant, SeedSelection, SowPlantEvent, plant_collision_check};
-use crate::game::player::{Player, PlayerClickEvent, ThrowSeedEvent, can_player_reach};
+use crate::game::plant::{
+    GNOME_THROW_RADIUS_PX, GrowthTimer, Plant, PlantType, SeedSelection, SowPlantEvent,
+    plant_collision_check,
+};
+use crate::game::player::{
+    PLAYER_THROW_RADIUS_PX, Player, PlayerClickEvent, ThrowSeedEvent, throw_path,
+};
+use crate::theme::palette::PLAYER_THROW_OUTLINE;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy::sprite::SpriteImageMode::Tiled;
@@ -144,6 +150,7 @@ fn on_player_click(
     q_seed_selection: Reactive<SeedSelection>,
     q_farm: Query<&Farm>,
     q_plants: Query<&Transform, With<Plant>>,
+    q_grown_plants: Query<(&Transform, &Plant), Without<GrowthTimer>>,
     mut q_bank_account: Query<&mut BankAccount>,
     mut bank_account_update_events: EventWriter<BankAccountUpdateEvent>,
 ) {
@@ -158,10 +165,24 @@ fn on_player_click(
 
             if let Ok(player_transform) = q_player.single() {
                 let player_position = player_transform.translation.xy();
-                if !can_player_reach(player_position, click_position) {
+                let gnome_positions: Vec<Vec2> = q_grown_plants
+                    .iter()
+                    .filter(|(_, p)| p.plant_type() == PlantType::Gnome)
+                    .map(|(t, _)| t.translation.xy())
+                    .collect();
+
+                let path = throw_path(
+                    player_position,
+                    gnome_positions,
+                    click_position,
+                    PLAYER_THROW_RADIUS_PX,
+                    GNOME_THROW_RADIUS_PX,
+                    GNOME_THROW_RADIUS_PX,
+                );
+                if path.is_none() {
                     can_sow = false;
                 }
-                // TODO consider the gnomes
+                // TODO use the path
             } else {
                 error!("No player found!");
                 return;

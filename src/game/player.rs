@@ -3,6 +3,7 @@
 use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::game::player_animation::PlayerAnimation;
+use crate::theme::palette::PLAYER_THROW_OUTLINE;
 use bevy::input::common_conditions::*;
 use bevy::window::PrimaryWindow;
 use bevy::{
@@ -10,9 +11,8 @@ use bevy::{
     prelude::*,
 };
 use bevy_vector_shapes::prelude::*;
-use crate::theme::palette::PLAYER_THROW_OUTLINE;
 
-const PLAYER_THROW_RADIUS_PX: f32 = 240.;
+pub const PLAYER_THROW_RADIUS_PX: f32 = 240.;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Player>();
@@ -82,9 +82,30 @@ pub struct ThrowSeedEvent {
     pub origin: Vec2,
 }
 
-pub fn can_player_reach(player_position: Vec2, hit_position: Vec2) -> bool {
-    let difference = player_position - hit_position;
-    difference.length() < PLAYER_THROW_RADIUS_PX
+pub fn throw_path(
+    origin: Vec2,
+    midpoints: Vec<Vec2>,
+    destination: Vec2,
+    origin_radius: f32,
+    midpoint_radius: f32,
+    dest_radius: f32,
+) -> Option<Vec<Vec2>> {
+    // TODO first pass - return just any gnome nearby
+    if (destination - origin).length() <= origin_radius {
+        return Some(vec![origin, destination]);
+    }
+    for midpoint in midpoints {
+        if (destination - midpoint).length() <= dest_radius {
+            return Some(vec![midpoint, destination]);
+        }
+    }
+    return None;
+
+    // TODO second pass - return shortest path
+    // TODO check if there is a path from player_position to hit_position
+    // If so, return the path
+    // let difference = origin - destination;
+    // difference.length() < PLAYER_THROW_RADIUS_PX
 }
 
 impl FromWorld for PlayerAssets {
