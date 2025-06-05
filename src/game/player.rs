@@ -89,26 +89,20 @@ pub fn throw_path(
     destination: IVec2,
     origin_radius: f32,
     midpoint_radius: f32,
-    dest_radius: f32,
 ) -> Option<Vec<IVec2>> {
-    let origin_radius_sq = (origin_radius * origin_radius) as i32;
-    let midpoint_radius_sq = (midpoint_radius * midpoint_radius) as i32;
-    let dest_radius_sq = (dest_radius * dest_radius) as i32;
-
     let mut not_origin = midpoints.clone();
     not_origin.push(destination);
 
     let successors = |p0: &IVec2| -> Vec<(IVec2, i32)> {
-        let radius = if *p0 == origin {
-            origin_radius as i32
+        let radius_sq = if *p0 == origin {
+            (origin_radius * origin_radius) as i32
         } else {
-            midpoint_radius as i32
+            (midpoint_radius * midpoint_radius) as i32
         };
-        let radius_sq = radius * radius;
         not_origin
             .iter()
-            .map(|p1| (*p1, (*p1 - p0).length_squared()))
-            .filter(|(p1, cost)| p0 != p1 && *cost < radius_sq)
+            .map(|&p1| (p1, (p1 - p0).length_squared()))
+            .filter(|(p1, cost_sq)| p0 != p1 && *cost_sq <= radius_sq)
             .collect()
     };
 
@@ -117,25 +111,8 @@ pub fn throw_path(
         successors,
         |p| (destination - p).length_squared(),
         |p| *p == destination,
-    );
-    // TODO use astar_result; test this
-
-    // TODO first pass - return just any gnome nearby
-    if (destination - origin).length_squared() <= origin_radius_sq {
-        return Some(vec![origin, destination]);
-    }
-    for midpoint in midpoints {
-        if (destination - midpoint).length_squared() <= dest_radius_sq {
-            return Some(vec![midpoint, destination]);
-        }
-    }
-    return None;
-
-    // TODO second pass - return shortest path
-    // TODO check if there is a path from player_position to hit_position
-    // If so, return the path
-    // let difference = origin - destination;
-    // difference.length() < PLAYER_THROW_RADIUS_PX
+    )?;
+    Some(astar_result.0)
 }
 
 impl FromWorld for PlayerAssets {
@@ -212,5 +189,69 @@ fn draw_player_circle(mut painter: ShapePainter, q_player: Query<&Transform, Wit
         painter.hollow = true;
         painter.thickness = 1.0;
         painter.circle(PLAYER_THROW_RADIUS_PX);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_path_simple() {
+        let origin = IVec2::new(0, 0);
+        let midpoints = vec![];
+        let dest = IVec2::new(10, 10);
+
+        let path = throw_path(origin, midpoints, dest, 12.0, 0.0);
+        assert!(path.is_some());
+
+        let path = path.unwrap();
+        assert_eq!(path.len(), 2);
+        assert_eq!(path[0], IVec2::new(0, 0));
+        assert_eq!(path[1], IVec2::new(10, 10));
+    }
+
+    #[test]
+    fn test_path_complex() {
+        let origin = IVec2::new(0, 0);
+        let midpoints = vec![IVec2::new(5, 1), IVec2::new(5, 100), IVec2::new(4, 0)];
+        let dest = IVec2::new(7, 1);
+
+        let origin_radius = 5.0;
+        let midpoint_radius = 3.0;
+
+        let path = throw_path(origin, midpoints, dest, origin_radius, midpoint_radius);
+        assert!(path.is_some());
+
+        let path = path.unwrap();
+        assert_eq!(path.len(), 4);
+        assert_eq!(path[0], IVec2::new(0, 0));
+        assert_eq!(path[1], IVec2::new(4, 0));
+        assert_eq!(path[2], IVec2::new(5, 1));
+        assert_eq!(path[3], IVec2::new(7, 1));
+    }
+
+    #[test]
+    fn test_path_simple_too_far() {
+        let origin = IVec2::new(0, 0);
+        let midpoints = vec![];
+        let dest = IVec2::new(10, 10);
+
+        let path = throw_path(origin, midpoints, dest, 2.0, 0.0);
+        assert!(path.is_none());
+    }
+
+    #[test]
+    fn test_path_complex_too_far() {
+        let origin = IVec2::new(0, 0);
+        let midpoints = vec![IVec2::new(5, 1), IVec2::new(5, 100), IVec2::new(4, 0)];
+        let dest = IVec2::new(7, 1);
+
+        let origin_radius = 4.0;
+        let midpoint_radius = 1.0;
+
+        let path = throw_path(origin, midpoints, dest, origin_radius, midpoint_radius);
+        print!("{:?}", path);
+        assert!(path.is_none());
     }
 }

@@ -176,7 +176,6 @@ fn on_player_click(
                     click_position.as_ivec2(),
                     PLAYER_THROW_RADIUS_PX,
                     GNOME_THROW_RADIUS_PX,
-                    GNOME_THROW_RADIUS_PX,
                 );
 
                 if path.is_none() {
