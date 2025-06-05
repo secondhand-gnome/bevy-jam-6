@@ -29,12 +29,13 @@
 ## Milestone 4
 
 - [x] A Gnome plant headbutts nearby enemies
-- [ ] A Gnome can catch, throw, and plant seeds
+- [x] A Gnome can catch, throw, and plant seeds
 - [x] Enemies retreat once all the plants are gone
 
 ## Milestone 5 (MVP)
 
-- [ ] harvest 3 daisies in a row to make a Daisy Chain. A nearby Gnome will throw it to you.
+- [ ] Animations for throwing seeds
+- [x] harvest 3 daisies in a row to make a Daisy Chain. A nearby Gnome will throw it to you.
 - [x] Sell a Daisy Chain for money
 - [x] Spend money on seedlings (they are no longer free)
 - [ ] Win condition: $150

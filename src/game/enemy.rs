@@ -23,7 +23,7 @@ const ENEMY_DESPAWN_DISTANCE: f32 = 1500.0;
 const EAT_RADIUS_PX: f32 = 80.0;
 const SPAWN_INTERVAL_S: f32 = 1.0;
 const ENEMY_MOVE_SPEED: f32 = 240.0; // TODO tune down
-const ENEMY_SPAWN_LIMIT: usize = 10;
+const ENEMY_SPAWN_LIMIT: usize = 5;// TODO tune
 const BITE_COOLDOWN_S: f32 = 2.5;
 const BITE_STRENGTH: i32 = 1;
 const ENEMY_MAX_HEALTH: i32 = 5;
@@ -175,7 +175,7 @@ fn tick_spawn(
         spawn_timer.0.tick(time.delta());
 
         if spawn_timer.0.just_finished() {
-            if q_enemies.iter().len() > ENEMY_SPAWN_LIMIT {
+            if q_enemies.iter().len() >= ENEMY_SPAWN_LIMIT {
                 info!("Not spawning an enemy - limit reached");
                 return;
             }

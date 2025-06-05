@@ -179,9 +179,14 @@ fn on_player_click(
                 );
 
                 if path.is_none() {
+                    info!(
+                        "No path to throw from {:?} to {:?}",
+                        player_position, click_position
+                    );
+                    // TODO play invalid location sound
                     can_sow = false;
                 }
-                // TODO use the path
+                // TODO animate the seed along the path
             } else {
                 error!("No player found!");
                 return;
