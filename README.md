@@ -11,3 +11,4 @@ https://secondhandgnome.itch.io/bevy-jam-6
 - Thanks to [Master484](http://m484games.ucoz.com/)
   for [Good Fruits](https://opengameart.org/content/good-fruits-m484-games)
 - Banjo Romp Music by <a href="https://pixabay.com/users/caffeine_creek_band-11181297/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=109570">Charles Shomo</a> from <a href="https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=109570">Pixabay</a>
+- Arbutus Font by Karolina Lach under OFL via [Google Fonts](https://fonts.google.com/specimen/Arbutus)

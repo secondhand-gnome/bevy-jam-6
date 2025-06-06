@@ -13,7 +13,7 @@ $gnome_sprite = "images/plants/gnome.png"
     Responsive<BackgroundColor>{ idle:#4f5269 hover:#96f5d9 press:#6eced4 }
 
     "sprite"
-        FlexNode{ justify_main:Center justify_self_cross:Stretch width:48px height:48px margin:{top:8px left:8px right:8px}}
+        FlexNode{ justify_main:Center justify_self_cross:Stretch width:36px height:36px margin:{top:8px left:8px right:8px}}
         LoadedImageNode{image:$daisy_sprite}
 
     "text"
@@ -23,7 +23,18 @@ $gnome_sprite = "images/plants/gnome.png"
 
 #commands
 LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite, $gnome_sprite]
-// TODO fonts
+RegisterFontFamilies[
+    {
+        family: "Arbutus"
+        fonts: [
+            {
+                path: "fonts/Arbutus-Regular.ttf"
+                width: Normal style: Normal weight: Normal
+            }
+        ]
+    }
+]
+LoadFonts["Arbutus"]
 
 #scenes
 "scene"
@@ -37,7 +48,7 @@ LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite, $gnome_sprite]
                 "sprite"
                     LoadedImageNode{image:$daisy_sprite}
                 "text"
-                    TextLine{ text:"Daisy $1" size:12 }
+                    TextLine{ text:"Daisy\n$1" size:12 font:{family:"Arbutus"}}
             }
 
         "seed_button_pineapple"
@@ -45,7 +56,7 @@ LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite, $gnome_sprite]
                 "sprite"
                     LoadedImageNode{image:$pineapple_sprite}
                 "text"
-                    TextLine{ text:"Pineapple $2" size:12 }
+                    TextLine{ text:"Pineapple\n$2" size:12 font:{family:"Arbutus"} }
             }
 
         "seed_button_dragonfruit"
@@ -53,7 +64,7 @@ LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite, $gnome_sprite]
                 "sprite"
                     LoadedImageNode{image:$dragonfruit_sprite}
                 "text"
-                    TextLine{ text:"Dragonfruit $3" size:12 }
+                    TextLine{ text:"Dragonfruit\n$3" size:12 font:{family:"Arbutus"} }
             }
 
         "seed_button_gnome"
@@ -61,14 +72,14 @@ LoadImages[$daisy_sprite, $dragonfruit_sprite, $pineapple_sprite, $gnome_sprite]
                 "sprite"
                     LoadedImageNode{image:$gnome_sprite}
                 "text"
-                    TextLine{ text:"Gnome $5" size:12 }
+                    TextLine{ text:"Gnome\n$5" size:12 font:{family:"Arbutus"} }
             }
-            
+
     "current_seed"
-        TextLine{text:"Current seed: ?"}
+        TextLine{text:"Current seed: ?" font:{family:"Arbutus"} }
 
     "bank"
-        TextLine{text:"Bank balance: $10"}
-        
+        TextLine{text:"Bank balance: $10" font:{family:"Arbutus"} }
+
     "endgame"
-        TextLine{text:"Collect $150 to win"}
+        TextLine{text:"Collect $150 to win" font:{family:"Arbutus"} }
