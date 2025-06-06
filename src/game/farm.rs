@@ -1,8 +1,7 @@
 use crate::asset_tracking::LoadResource;
 use crate::game::enemy::enemy_spawner;
 use crate::game::plant::{
-    GNOME_THROW_RADIUS_PX, GrowthTimer, Plant, PlantType, SeedSelection, SowPlantEvent,
-    plant_collision_check,
+    GNOME_THROW_RADIUS_PX, GrowthTimer, Plant, PlantType, SeedSelection, plant_collision_check,
 };
 use crate::game::player::{
     PLAYER_THROW_RADIUS_PX, Player, PlayerClickEvent, ThrowSeedEvent, throw_path,
@@ -143,7 +142,6 @@ fn draw_outline(mut painter: ShapePainter, q_farm: Query<&Farm>) {
 
 fn on_player_click(
     mut click_events: EventReader<PlayerClickEvent>,
-    mut sow_events: EventWriter<SowPlantEvent>,
     mut throw_seed_events: EventWriter<ThrowSeedEvent>,
     q_player: Query<&Transform, With<Player>>,
     q_seed_selection: Reactive<SeedSelection>,
@@ -162,35 +160,35 @@ fn on_player_click(
 
             let mut can_sow = true;
 
-            if let Ok(player_transform) = q_player.single() {
-                let player_position = player_transform.translation.xy().as_ivec2();
-                let gnome_positions: Vec<IVec2> = q_grown_plants
-                    .iter()
-                    .filter(|(_, p)| p.plant_type() == PlantType::Gnome)
-                    .map(|(t, _)| t.translation.xy().as_ivec2())
-                    .collect();
-
-                let path = throw_path(
-                    player_position,
-                    gnome_positions,
-                    click_position.as_ivec2(),
-                    PLAYER_THROW_RADIUS_PX,
-                    GNOME_THROW_RADIUS_PX,
-                );
-
-                if path.is_none() {
-                    info!(
-                        "No path to throw from {:?} to {:?}",
-                        player_position, click_position
-                    );
-                    // TODO play invalid location sound
-                    can_sow = false;
-                }
-                // TODO animate the seed along the path
-            } else {
+            let Ok(player_transform) = q_player.single() else {
                 error!("No player found!");
                 return;
+            };
+
+            let player_position = player_transform.translation.xy().as_ivec2();
+            let gnome_positions: Vec<IVec2> = q_grown_plants
+                .iter()
+                .filter(|(_, p)| p.plant_type() == PlantType::Gnome)
+                .map(|(t, _)| t.translation.xy().as_ivec2())
+                .collect();
+
+            let seed_path = throw_path(
+                player_position,
+                gnome_positions,
+                click_position.as_ivec2(),
+                PLAYER_THROW_RADIUS_PX,
+                GNOME_THROW_RADIUS_PX,
+            );
+
+            if seed_path.is_none() {
+                info!(
+                    "No path to throw from {:?} to {:?}",
+                    player_position, click_position
+                );
+                // TODO play invalid location sound
+                can_sow = false;
             }
+            // TODO animate the seed along the path
 
             for plant_transform in q_plants.iter() {
                 let plant_position = plant_transform.translation.xy();
@@ -221,19 +219,23 @@ fn on_player_click(
 
             if can_sow {
                 // Actually sow a plant
+                // Spawn a seed
                 // TODO don't actually sow until seed hits the ground
-                sow_events.write(SowPlantEvent {
-                    position: click_position,
-                    seed_type,
-                });
+                // sow_events.write(SowPlantEvent {
+                //     position: click_position,
+                //     seed_type,
+                // });
 
                 bank_account.deduct(seed_type.price());
                 bank_account_update_events.write(BankAccountUpdateEvent);
 
-                // TODO handle multiple throws in a chain
                 throw_seed_events.write(ThrowSeedEvent {
-                    origin: click_position,
+                    from_player: true,
+                    path: seed_path.unwrap(),
+                    seed_type,
                 });
+
+                // TODO query for SeedLandedEvent, then sow plants where they landed
             }
         }
     }

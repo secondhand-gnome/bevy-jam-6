@@ -8,6 +8,7 @@ mod plant;
 pub mod player;
 mod player_animation;
 pub mod ui;
+mod seed;
 
 use crate::game::player::{PlayerClickEvent, ThrowSeedEvent};
 use avian2d::PhysicsPlugins;
@@ -27,6 +28,7 @@ pub(super) fn plugin(app: &mut App) {
         level::plugin,
         player::plugin,
         player_animation::plugin,
+        seed::plugin,
         ui::plugin,
         barn::plugin,
     ));

@@ -12,6 +12,7 @@ use bevy::{
 };
 use bevy_vector_shapes::prelude::*;
 use pathfinding::prelude::astar;
+use crate::game::plant::PlantType;
 
 pub const PLAYER_THROW_RADIUS_PX: f32 = 240.;
 
@@ -77,10 +78,11 @@ pub struct PlayerAssets {
 #[derive(Event, Debug, Default)]
 pub struct PlayerClickEvent(pub Vec2);
 
-#[derive(Event, Debug, Default)]
-// TODO track who is the origin of the throw
+#[derive(Event, Debug)]
 pub struct ThrowSeedEvent {
-    pub origin: Vec2,
+    pub from_player: bool,
+    pub path: Vec<IVec2>,
+    pub seed_type: PlantType,
 }
 
 pub fn throw_path(

@@ -29,13 +29,19 @@ fn animate_throw_seed(
     mut player_animation: Single<&mut PlayerAnimation, With<Player>>,
     player_assets: Res<PlayerAssets>,
 ) {
-    // TODO if player not thrower, don't handle event
     for ev in events.read() {
+        if !ev.from_player {
+            continue;
+        }
         let rng = &mut thread_rng();
         let throw_sound = player_assets.throw_sounds.choose(rng).unwrap().clone();
+        let Some(throw_origin) = ev.path.get(0) else {
+            warn!("No origin for throw path");
+            continue;
+        };
         commands.spawn((
             sound_effect(throw_sound),
-            Transform::from_translation(ev.origin.extend(0.)),
+            Transform::from_translation(throw_origin.as_vec2().extend(0.)),
         ));
 
         player_animation.update_state(PlayerAnimationState::Planting);

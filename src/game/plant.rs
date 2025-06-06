@@ -181,7 +181,7 @@ pub struct PlantAssets {
     burn_sound: Handle<AudioSource>,
 }
 
-#[derive(Default, Debug, Clone, Copy, PartialEq, Eq, Reflect)]
+#[derive(Default, Component, Debug, Clone, Copy, PartialEq, Eq, Reflect)]
 pub enum PlantType {
     #[default]
     Daisy,
