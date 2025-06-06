@@ -218,14 +218,6 @@ fn on_player_click(
             }
 
             if can_sow {
-                // Actually sow a plant
-                // Spawn a seed
-                // TODO don't actually sow until seed hits the ground
-                // sow_events.write(SowPlantEvent {
-                //     position: click_position,
-                //     seed_type,
-                // });
-
                 bank_account.deduct(seed_type.price());
                 bank_account_update_events.write(BankAccountUpdateEvent);
 
@@ -234,8 +226,6 @@ fn on_player_click(
                     path: seed_path.unwrap(),
                     seed_type,
                 });
-
-                // TODO query for SeedLandedEvent, then sow plants where they landed
             }
         }
     }
