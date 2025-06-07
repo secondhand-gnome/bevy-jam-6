@@ -99,6 +99,12 @@ impl BankAccount {
 #[derive(Event, Debug, Default)]
 pub struct RestartGameEvent;
 
+#[derive(Event, Debug, Default)]
+pub struct LoseGameEvent;
+
+#[derive(Event, Debug, Default)]
+pub struct WinGameEvent;
+
 impl FromWorld for FarmAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();

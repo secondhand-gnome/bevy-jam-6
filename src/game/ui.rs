@@ -101,8 +101,6 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
         });
 }
 
-// TODO hide UI on exit
-
 fn update_ui(
     mut commands: Commands,
     mut bank_account_update_events: EventReader<BankAccountUpdateEvent>,

@@ -251,7 +251,7 @@ fn pursue_plants(
 
         if plant_vectors.is_empty() {
             // No plants - Move up
-            // TODO a* pathfinding
+            // TODO a* pathfinding - Create a pre-set grid of points, filter valid points, and navigate them
             *enemy_velocity = LinearVelocity(ENEMY_MOVE_SPEED * Vec2::new(0., 1.));
             continue;
         }
