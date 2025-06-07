@@ -3,6 +3,7 @@
 use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
+use crate::game::despawn::DespawnOnRestart;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
 use crate::game::plant::{
@@ -65,6 +66,7 @@ fn enemy(spawn_position: Vec3, enemy_assets: &EnemyAssets) -> impl Bundle {
         Name::new("Enemy"),
         Enemy,
         RigidBody::Kinematic,
+        DespawnOnRestart,
         Collider::circle(ENEMY_RADIUS),
         CollisionLayers::new(
             [GameLayer::Enemy],

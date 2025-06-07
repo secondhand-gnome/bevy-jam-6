@@ -1,4 +1,5 @@
 use crate::asset_tracking::LoadResource;
+use crate::game::despawn::DespawnOnRestart;
 use crate::game::enemy::enemy_spawner;
 use crate::game::plant::{
     GNOME_THROW_RADIUS_PX, GrowthTimer, Plant, PlantType, SeedSelection, plant_collision_check,
@@ -24,11 +25,11 @@ const STARTING_BALANCE: f32 = 10.0;
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Farm>();
     app.add_event::<BankAccountUpdateEvent>();
+    app.add_event::<RestartGameEvent>();
 
     app.register_type::<FarmAssets>();
     app.load_resource::<FarmAssets>();
-    app.add_systems(Update, draw_outline);
-    app.add_systems(Update, on_player_click);
+    app.add_systems(Update, (draw_outline, on_player_click, restart_game));
 }
 
 pub fn farm(farm_assets: &FarmAssets) -> impl Bundle {
@@ -94,6 +95,9 @@ impl BankAccount {
         self.balance += amount;
     }
 }
+
+#[derive(Event, Debug, Default)]
+pub struct RestartGameEvent;
 
 impl FromWorld for FarmAssets {
     fn from_world(world: &mut World) -> Self {
@@ -227,6 +231,23 @@ fn on_player_click(
                     seed_type,
                 });
             }
+        }
+    }
+}
+
+fn restart_game(
+    mut commands: Commands,
+    mut events: EventReader<RestartGameEvent>,
+    mut q_entities: Query<Entity, With<DespawnOnRestart>>,
+    mut q_bank_account: Query<&mut BankAccount>,
+    mut ev_bank_account_update: EventWriter<BankAccountUpdateEvent>,
+) {
+    for _ in events.read() {
+        q_bank_account.single_mut().unwrap().balance = STARTING_BALANCE;
+        ev_bank_account_update.write_default();
+
+        for entity in q_entities.iter_mut() {
+            commands.entity(entity).despawn();
         }
     }
 }

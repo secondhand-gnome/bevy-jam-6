@@ -5,7 +5,7 @@ $pineapple_sprite = "images/plants/pineapple.png"
 $gnome_sprite = "images/plants/gnome.png"
 
 +seed_item = \
-    GridNode{ justify_main:Center justify_self_cross:Stretch width:96px height:86px }
+    GridNode{ justify_main:Center justify_self_cross:Stretch width:106px height:86px }
     Splat<Border>(1px)
     Splat<Margin>(2px)
     BrRadius(5px)
@@ -40,8 +40,21 @@ LoadFonts["Arbutus"]
 "scene"
     GridNode{ padding:{top:8px bottom:8px left:8px right:8px}, margin:{top:8px left:8px} }
 
+    "reset_button"
+        FlexNode{ width:64px height:40px padding:{top:8px bottom:8px left:8px right:8px}, margin:{top:8px left:8px}}
+        BackgroundColor(#bce7ff)
+        Splat<Border>(1px)
+        Splat<Margin>(2px)
+        BrRadius(5px)
+        BorderColor(#1c1b44)
+        Responsive<BackgroundColor>{ idle:#4f5269 hover:#96f5d9 press:#6eced4 }
+
+        "text"
+            FlexNode{ justify_main:Center justify_self_cross:Stretch margin:{top:8px}}
+            TextLine{ text:"Reset" size:14 font:{family:"Arbutus"} }
+
     "seeds"
-        GridNode{ padding:{top:8px bottom:8px left:8px right:8px}, margin:{top:8px left:8px}  grid_template_columns: [(Count(4) auto)] }
+        GridNode{ padding:{top:8px bottom:8px left:8px right:8px}, margin:{top:8px left:8px}  grid_template_columns: [(Count(5) auto)] }
         BackgroundColor(#bce7ff)
         "seed_button_daisy"
             +seed_item{

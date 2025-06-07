@@ -1,6 +1,7 @@
 use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
+use crate::game::despawn::DespawnOnRestart;
 use crate::game::farm::{BankAccount, BankAccountUpdateEvent};
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
@@ -77,6 +78,7 @@ fn plant(position: Vec2, plant_assets: &PlantAssets, plant_type: PlantType) -> i
         Name::new(format!("Plant at {:?}", position)),
         Plant { plant_type },
         RigidBody::Static,
+        DespawnOnRestart,
         Collider::circle(PLANT_RADIUS_PX),
         CollisionLayers::new([GameLayer::Plant], [GameLayer::Plant, GameLayer::Enemy]),
         Sprite {
@@ -101,6 +103,7 @@ fn fireball(
             active: true,
             spawning_entity,
         },
+        DespawnOnRestart,
         RigidBody::Kinematic,
         Collider::circle(FIREBALL_RADIUS_PX),
         CollisionLayers::new([GameLayer::Fireball], [GameLayer::Enemy]), // TODO also interact with plants

@@ -40,7 +40,7 @@
 - [x] Spend money on seedlings (they are no longer free)
 - [ ] Win condition: $150
 - [ ] Lose condition: no money and not enough seeds or daisies to win
-- [ ] UI for resetting the game on game over
+- [x] UI for resetting the game on game over
 
 ## Milestone 6
 

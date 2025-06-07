@@ -1,4 +1,4 @@
-use crate::game::farm::{BankAccount, BankAccountUpdateEvent};
+use crate::game::farm::{BankAccount, BankAccountUpdateEvent, RestartGameEvent};
 use crate::game::plant::{PlantType, SeedSelection};
 use bevy::prelude::*;
 use bevy_cobweb::prelude::*;
@@ -60,6 +60,15 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                             .get_mut(&mut c, scene_entity)?
                             .set_seed_type(PlantType::Gnome);
                         c.react().broadcast(CurrentSeedUpdate);
+                        OK
+                    },
+                );
+            });
+
+            h.edit("reset_button", |h| {
+                h.on_pressed(
+                    move |mut restart_game_events: EventWriter<RestartGameEvent>| {
+                        restart_game_events.write_default();
                         OK
                     },
                 );

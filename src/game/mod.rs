@@ -1,4 +1,5 @@
 mod barn;
+mod despawn;
 mod enemy;
 mod farm;
 mod health;

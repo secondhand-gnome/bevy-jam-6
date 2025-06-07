@@ -1,5 +1,6 @@
 use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
+use crate::game::despawn::DespawnOnRestart;
 use crate::game::plant::{PlantType, SowPlantEvent};
 use crate::game::player::ThrowSeedEvent;
 use avian2d::prelude::{LinearVelocity, RigidBody};
@@ -34,6 +35,7 @@ pub fn seed(
     (
         Name::new("Seed"),
         Seed,
+        DespawnOnRestart,
         plant_type,
         path,
         Transform::from_translation(origin),
