@@ -236,7 +236,7 @@ fn pursue_plants(
             (enemy_transform.translation - player_transform.translation).length();
         if dist_from_player > ENEMY_DESPAWN_DISTANCE {
             info!("Despawning enemy {:?} due to distance", enemy);
-            commands.entity(enemy).despawn();
+            commands.entity(enemy).try_despawn();
             return;
         }
 

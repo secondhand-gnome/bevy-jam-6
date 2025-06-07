@@ -431,7 +431,7 @@ fn tick_fireball_lifetime(
     for (entity, mut timer) in q_fireballs {
         timer.0.tick(time.delta());
         if timer.0.just_finished() {
-            commands.entity(entity).despawn();
+            commands.entity(entity).try_despawn();
         }
     }
 }
@@ -489,7 +489,7 @@ fn burn_stuff(
 
         // TODO write a DamageEnemyEvent instead of directly affecting health here
         burnable_health.reduce(FIREBALL_DAMAGE);
-        commands.entity(*fireball_entity).despawn();
+        commands.entity(*fireball_entity).try_despawn();
         fireball.deactivate();
 
         // TODO make smoke

@@ -86,7 +86,7 @@ fn remove_dead(
     for (entity, health, transform) in q_health {
         if !health.is_alive() {
             info!("{:?} dies", entity);
-            commands.entity(entity).despawn();
+            commands.entity(entity).try_despawn();
 
             // Play sound
             commands.spawn((

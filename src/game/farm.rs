@@ -271,7 +271,7 @@ fn restart_game(
         ev_bank_account_update.write_default();
 
         for entity in q_entities.iter_mut() {
-            info!("Despawning {:?}", entity);
+            debug!("Despawning {:?}", entity);
             commands.entity(entity).despawn();
         }
     }
