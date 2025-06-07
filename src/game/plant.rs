@@ -19,7 +19,7 @@ use rand::prelude::SliceRandom;
 const PLANT_RADIUS_PX: f32 = 30.;
 pub const GNOME_THROW_RADIUS_PX: f32 = 240.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
-const PLANT_MAX_HEALTH: i32 = 5; // TODO depends on plant type
+const PLANT_MAX_HEALTH: i32 = 5;
 
 pub const DAISY_CHAIN_LENGTH: usize = 3;
 const DAISY_CHAIN_VALUE: f32 = 10.;
@@ -461,6 +461,16 @@ fn burn_stuff(
             } else {
                 continue;
             };
+
+        let Some(burnable_transform) = q_burnables
+            .iter()
+            .find(|(e, _, _)| e == burnable_entity)
+            .map(|(_, _, t)| t)
+        else {
+            continue;
+        };
+        let burnable_pos = burnable_transform.translation;
+
         let Some(mut burnable_health) = q_burnables
             .iter_mut()
             .find(|(e, _, _)| e == burnable_entity)
@@ -485,8 +495,7 @@ fn burn_stuff(
         // TODO make smoke
         commands.spawn((
             sound_effect(plant_assets.burn_sound.clone()),
-            // TODO transform
-            // Transform::from_translation(event.position.extend(0.)),
+            Transform::from_translation(burnable_pos),
         ));
     }
 }
@@ -523,8 +532,6 @@ fn sell_daisy_chains(
     for ev in sell_events.read() {
         info!("Selling daisy chain: {:?}", ev.daisy_entities.iter());
         for entity in ev.daisy_entities.iter() {
-            // TODO instead of despawn, mark as "Sold" and give it a short lifetime
-            // TODO enemies should ignore "Sold" daisies
             commands.entity(*entity).despawn();
         }
         let Ok(mut bank_account) = q_bank_account.single_mut() else {
@@ -533,7 +540,8 @@ fn sell_daisy_chains(
         };
         bank_account.credit(DAISY_CHAIN_VALUE);
         bank_account_update_events.write(BankAccountUpdateEvent);
-        // TODO sound, animation, particle effects
+
+        // TODO spawn a coin animation, play a coin sound
     }
 }
 
