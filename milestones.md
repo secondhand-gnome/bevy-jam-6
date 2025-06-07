@@ -34,7 +34,7 @@
 
 ## Milestone 5 (MVP)
 
-- [ ] Animations for throwing seeds
+- [x] Animations for throwing seeds
 - [x] harvest 3 daisies in a row to make a Daisy Chain. A nearby Gnome will throw it to you.
 - [x] Sell a Daisy Chain for money
 - [x] Spend money on seedlings (they are no longer free)

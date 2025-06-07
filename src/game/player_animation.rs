@@ -44,7 +44,11 @@ fn animate_throw_seed(
             Transform::from_translation(throw_origin.as_vec2().extend(0.)),
         ));
 
-        player_animation.update_state(PlayerAnimationState::Planting);
+        let mut left = false;
+        if let Some(next_point) = ev.path.get(1) {
+            left = throw_origin.x > next_point.x;
+        }
+        player_animation.update_state(PlayerAnimationState::Planting(left));
     }
 }
 
@@ -76,14 +80,15 @@ pub struct PlayerAnimation {
 #[derive(Reflect, PartialEq)]
 pub enum PlayerAnimationState {
     Idling,
-    Planting,
+    Planting(bool),
     Mailing,
 }
 
 impl PlayerAnimation {
     const IDLE_FRAME: usize = 0;
     const IDLE_INTERVAL: Duration = Duration::from_millis(500);
-    const PLANTING_FRAME: usize = 2;
+    const PLANTING_FRAME_RIGHT: usize = 2;
+    const PLANTING_FRAME_LEFT: usize = 1;
     const PLANTING_INTERVAL: Duration = Duration::from_millis(500);
     const MAILING_FRAME: usize = 1;
     const MAILING_INTERVAL: Duration = Duration::from_millis(250);
@@ -100,11 +105,16 @@ impl PlayerAnimation {
         }
     }
 
-    fn planting() -> Self {
+    fn planting(left: bool) -> Self {
+        let frame = if left {
+            Self::PLANTING_FRAME_LEFT
+        } else {
+            Self::PLANTING_FRAME_RIGHT
+        };
         Self {
             timer: Timer::new(Self::PLANTING_INTERVAL, TimerMode::Once),
-            frame: Self::PLANTING_FRAME,
-            state: PlayerAnimationState::Planting,
+            frame,
+            state: PlayerAnimationState::Planting(left),
         }
     }
 
@@ -132,7 +142,7 @@ impl PlayerAnimation {
         if self.state != state {
             match state {
                 PlayerAnimationState::Idling => *self = Self::idling(),
-                PlayerAnimationState::Planting => *self = Self::planting(),
+                PlayerAnimationState::Planting(left) => *self = Self::planting(left),
                 PlayerAnimationState::Mailing => *self = Self::mailing(),
             }
         }
