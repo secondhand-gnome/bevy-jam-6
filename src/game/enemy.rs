@@ -176,7 +176,7 @@ fn tick_spawn(
 
         if spawn_timer.0.just_finished() {
             if q_enemies.iter().len() >= ENEMY_SPAWN_LIMIT {
-                info!("Not spawning an enemy - limit reached");
+                debug!("Not spawning an enemy - limit reached");
                 return;
             }
             if q_plants
@@ -185,7 +185,7 @@ fn tick_spawn(
                 .count()
                 == 0
             {
-                info!("Not spawning an enemy - no daisies");
+                debug!("Not spawning an enemy - no daisies");
                 return;
             }
 

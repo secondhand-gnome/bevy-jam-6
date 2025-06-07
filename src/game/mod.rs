@@ -7,8 +7,8 @@ mod physics;
 mod plant;
 pub mod player;
 mod player_animation;
-pub mod ui;
 mod seed;
+pub mod ui;
 
 use crate::game::player::{PlayerClickEvent, ThrowSeedEvent};
 use avian2d::PhysicsPlugins;

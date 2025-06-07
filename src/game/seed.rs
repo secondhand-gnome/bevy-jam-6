@@ -8,8 +8,8 @@ use bevy::prelude::*;
 use std::fmt::Debug;
 
 const SEED_Z_LAYER: f32 = 2.0;
-const SEED_MOVE_SPEED: f32 = 10.;
-const SEED_POINT_EPLISON: f32 = 2.0;
+const SEED_MOVE_SPEED: f32 = 300.;
+const SEED_POINT_EPLISON: f32 = 5.0;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Seed>();
@@ -86,12 +86,16 @@ fn create_seeds(
         let Some(origin) = ev.path.first() else {
             continue;
         };
-        info!("Spawned a seed at {:?}", origin);
+        info!(
+            "Spawned a seed at {:?} with path {:?}",
+            origin,
+            ev.path[1..].to_owned()
+        );
         commands.spawn(seed(
             &seed_assets,
             ev.seed_type,
             SeedPath {
-                path: ev.path.clone(),
+                path: ev.path[1..].to_owned(),
             },
             origin.as_vec2().extend(SEED_Z_LAYER),
         ));
@@ -105,7 +109,7 @@ fn move_seeds(
             Entity,
             &Transform,
             &mut LinearVelocity,
-            &mut SeedPath,
+            &SeedPath,
             &PlantType,
         ),
         With<Seed>,
@@ -113,35 +117,45 @@ fn move_seeds(
     mut sow_plants_events: EventWriter<SowPlantEvent>,
     mut throw_seed_events: EventWriter<ThrowSeedEvent>,
 ) {
-    for (seed, seed_transform, mut vel, mut seed_path, seed_type) in q_seeds.iter_mut() {
-        if seed_path.path.len() == 0 {
+    for (seed, seed_transform, mut vel, seed_path, seed_type) in q_seeds.iter_mut() {
+        if seed_path.path.is_empty() {
+            info!(
+                "Seed has no path, gonna plant at {:?}",
+                seed_transform.translation.xy()
+            );
+            commands.entity(seed).despawn();
             sow_plants_events.write(SowPlantEvent {
                 position: seed_transform.translation.xy(),
                 seed_type: *seed_type,
             });
-            commands.entity(seed).despawn();
-
-            continue;
+            return;
         }
-
-        // TODO debug this
         let target = seed_path.path.first().unwrap().as_vec2();
         let vec_to_target = target - seed_transform.translation.xy();
         let dist_from_target = vec_to_target.length();
         if dist_from_target < SEED_POINT_EPLISON {
-            // TODO if we reach this point, throw the seed to the next point
-            // TODO despawn this seed as well
             commands.entity(seed).despawn();
-            throw_seed_events.write(ThrowSeedEvent {
-                from_player: false,
-                path: seed_path.path[1..].to_owned(),
-                seed_type: *seed_type,
-            });
+
+            if seed_path.path.len() == 1 {
+                info!("Seed reached point {:?}, gonna plant now", target);
+                sow_plants_events.write(SowPlantEvent {
+                    position: seed_transform.translation.xy(),
+                    seed_type: *seed_type,
+                });
+            } else {
+                info!(
+                    "Seed reached point {:?}, going to next point {:?}",
+                    target, seed_path.path[1],
+                );
+
+                throw_seed_events.write(ThrowSeedEvent {
+                    from_player: false,
+                    path: seed_path.path.clone(),
+                    seed_type: *seed_type,
+                });
+            }
+        } else {
+            *vel = LinearVelocity(SEED_MOVE_SPEED * vec_to_target.normalize());
         }
-        // if seed_transform.translation
-        //     * vel = LinearVelocity(
-        //     SEED_MOVE_SPEED
-        //         * (current_target - seed_transform.translation.xy()).normalize(),
-        // );
     }
 }

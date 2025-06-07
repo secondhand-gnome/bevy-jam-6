@@ -35,7 +35,7 @@ fn animate_throw_seed(
         }
         let rng = &mut thread_rng();
         let throw_sound = player_assets.throw_sounds.choose(rng).unwrap().clone();
-        let Some(throw_origin) = ev.path.get(0) else {
+        let Some(throw_origin) = ev.path.first() else {
             warn!("No origin for throw path");
             continue;
         };

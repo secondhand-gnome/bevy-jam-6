@@ -2,6 +2,7 @@
 
 use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
+use crate::game::plant::PlantType;
 use crate::game::player_animation::PlayerAnimation;
 use crate::theme::palette::PLAYER_THROW_OUTLINE;
 use bevy::input::common_conditions::*;
@@ -12,7 +13,6 @@ use bevy::{
 };
 use bevy_vector_shapes::prelude::*;
 use pathfinding::prelude::astar;
-use crate::game::plant::PlantType;
 
 pub const PLAYER_THROW_RADIUS_PX: f32 = 240.;
 
