@@ -1,4 +1,4 @@
-use crate::game::farm::{BankAccount, BankAccountUpdateEvent, RestartGameEvent};
+use crate::game::farm::{BankAccount, BankAccountUpdateEvent, RestartGameEvent, WINNING_BALANCE};
 use crate::game::plant::{PlantType, SeedSelection};
 use bevy::prelude::*;
 use bevy_cobweb::prelude::*;
@@ -94,7 +94,13 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                         return;
                     };
                     let balance = bank_account.balance();
-                    write_text!(editor, *id, "Bank balance: ${}", balance);
+                    write_text!(
+                        editor,
+                        *id,
+                        "Bank balance: ${}/${}",
+                        balance,
+                        WINNING_BALANCE
+                    );
                     info!("Update UI for bank account balance {:?}", balance);
                 },
             );

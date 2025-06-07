@@ -93,6 +93,3 @@ LoadFonts["Arbutus"]
 
     "bank"
         TextLine{text:"Bank balance: $10" font:{family:"Arbutus"} }
-
-    "endgame"
-        TextLine{text:"Collect $150 to win" font:{family:"Arbutus"} }
