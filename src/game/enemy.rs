@@ -7,13 +7,15 @@ use crate::game::despawn::DespawnOnRestart;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
 use crate::game::plant::{
-    Burnable, DRAGONFRUIT_STRENGTH, DamagePlantEvent, GNOME_STRENGTH, PINEAPPLE_STRENGTH, Plant,
-    PlantType, SpewFireEvent,
+    Burnable, DRAGONFRUIT_STRENGTH, DamagePlantEvent, GNOME_STRENGTH, PINEAPPLE_SPREAD_DISTANCE,
+    PINEAPPLE_STRENGTH, Plant, PlantType, SowPlantEvent, SpewFireEvent,
 };
 use crate::game::player::Player;
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
+use avian2d::math::TAU;
 use avian2d::prelude::*;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
+use bevy::math::ops::{cos, sin};
 use bevy::prelude::*;
 use bevy_vector_shapes::prelude::*;
 use rand::Rng;
@@ -221,6 +223,7 @@ fn pursue_plants(
     q_player: Query<&Transform, With<Player>>,
     mut damage_plant_events: EventWriter<DamagePlantEvent>,
     mut damage_enemy_events: EventWriter<DamageEnemyEvent>,
+    mut sow_plant_events: EventWriter<SowPlantEvent>,
     mut spew_fire_events: EventWriter<SpewFireEvent>,
     enemy_assets: Res<EnemyAssets>,
 ) {
@@ -284,11 +287,22 @@ fn pursue_plants(
                             amount: PINEAPPLE_STRENGTH,
                         });
 
-                        // TODO chain reaction - create more nearby pineapples that are weaker
                         commands.spawn((
                             sound_effect(enemy_assets.rat_damage_sound.clone()),
                             Transform::from_translation(enemy_transform.translation),
                         ));
+
+                        let rng = &mut rand::thread_rng();
+                        let angle: f32 = rng.gen_range(0.0..TAU);
+                        let spawn_vec2 = PINEAPPLE_SPREAD_DISTANCE
+                            * Vec2::new(cos(angle), sin(angle)).normalize();
+                        let spawn_pos = plant_transform.translation.xy() + spawn_vec2;
+
+                        // TODO play sound on spawn
+                        sow_plant_events.write(SowPlantEvent {
+                            position: spawn_pos,
+                            seed_type: PlantType::Pineapple,
+                        });
                     }
                     PlantType::Dragonfruit => {
                         // Enemy takes damage
