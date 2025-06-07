@@ -21,8 +21,7 @@ pub const GNOME_THROW_RADIUS_PX: f32 = 240.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
 const PLANT_MAX_HEALTH: i32 = 5; // TODO depends on plant type
 
-const DAISY_CHAIN_LENGTH: usize = 3;
-// const DAISY_CHAIN_DISTANCE: f32 = 40.; // TODO use
+pub const DAISY_CHAIN_LENGTH: usize = 3;
 const DAISY_CHAIN_VALUE: f32 = 10.;
 
 pub const GNOME_STRENGTH: i32 = 1;

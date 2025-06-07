@@ -1,12 +1,15 @@
+use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::game::despawn::DespawnOnRestart;
 use crate::game::enemy::enemy_spawner;
 use crate::game::plant::{
-    GNOME_THROW_RADIUS_PX, GrowthTimer, Plant, PlantType, SeedSelection, plant_collision_check,
+    DAISY_CHAIN_LENGTH, GNOME_THROW_RADIUS_PX, GrowthTimer, Plant, PlantType, SeedSelection,
+    plant_collision_check,
 };
 use crate::game::player::{
     PLAYER_THROW_RADIUS_PX, Player, PlayerClickEvent, ThrowSeedEvent, throw_path,
 };
+use crate::theme::palette::{GNOME_THROW_OUTLINE, LOSER_BACKGROUND, WINNER_BACKGROUND};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy::sprite::SpriteImageMode::Tiled;
@@ -21,6 +24,8 @@ const FARM_SIZE_PX: Vec2 = Vec2::new(
 );
 
 const STARTING_BALANCE: f32 = 10.0;
+const WINNING_BALANCE: f32 = 150.0;
+const LOSING_BALANCE: f32 = 0.0;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Farm>();
@@ -29,7 +34,17 @@ pub(super) fn plugin(app: &mut App) {
 
     app.register_type::<FarmAssets>();
     app.load_resource::<FarmAssets>();
-    app.add_systems(Update, (draw_outline, on_player_click, restart_game));
+    app.add_systems(Update, draw_outline);
+    app.add_systems(
+        Update,
+        (
+            end_game,
+            end_game_button_system,
+            on_player_click,
+            restart_game,
+        )
+            .in_set(PausableSystems),
+    );
 }
 
 pub fn farm(farm_assets: &FarmAssets) -> impl Bundle {
@@ -75,6 +90,14 @@ pub struct FarmAssets {
 
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Reflect)]
 #[reflect(Component)]
+struct EndGameDisplay;
+
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Reflect)]
+#[reflect(Component)]
+struct EndGameRestartButton;
+
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Reflect)]
+#[reflect(Component)]
 pub struct BankAccount {
     balance: f32,
 }
@@ -98,12 +121,6 @@ impl BankAccount {
 
 #[derive(Event, Debug, Default)]
 pub struct RestartGameEvent;
-
-#[derive(Event, Debug, Default)]
-pub struct LoseGameEvent;
-
-#[derive(Event, Debug, Default)]
-pub struct WinGameEvent;
 
 impl FromWorld for FarmAssets {
     fn from_world(world: &mut World) -> Self {
@@ -249,11 +266,129 @@ fn restart_game(
     mut ev_bank_account_update: EventWriter<BankAccountUpdateEvent>,
 ) {
     for _ in events.read() {
+        info!("Receive restart event");
         q_bank_account.single_mut().unwrap().balance = STARTING_BALANCE;
         ev_bank_account_update.write_default();
 
         for entity in q_entities.iter_mut() {
+            info!("Despawning {:?}", entity);
             commands.entity(entity).despawn();
+        }
+    }
+}
+
+fn end_game(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    q_plants: Query<&Plant>,
+    q_bank_account: Query<&BankAccount>,
+    q_despawn_restart: Query<Entity, (With<DespawnOnRestart>, Without<EndGameDisplay>)>,
+) {
+    let Ok(bank_account) = q_bank_account.single() else {
+        // No bank account
+        return;
+    };
+    if bank_account.balance <= LOSING_BALANCE {
+        let daisy_count = q_plants
+            .iter()
+            .filter(|p| p.plant_type() == PlantType::Daisy)
+            .count();
+        if daisy_count >= DAISY_CHAIN_LENGTH {
+            // There's still a chance
+            return;
+        }
+        commands.spawn(end_game_text(
+            Name::new("GameOverText"),
+            Text::new("LOSE"),
+            LOSER_BACKGROUND,
+            asset_server,
+        ));
+    } else if bank_account.balance >= WINNING_BALANCE {
+        commands.spawn(end_game_text(
+            Name::new("WinGameText"),
+            Text::new("WINNER"),
+            WINNER_BACKGROUND,
+            asset_server,
+        ));
+    } else {
+        return;
+    }
+
+    // Despawn everything and show a restart button
+    for entity in q_despawn_restart {
+        commands.entity(entity).despawn();
+    }
+}
+
+fn end_game_text(
+    name: Name,
+    text: Text,
+    background_color: Color,
+    asset_server: Res<AssetServer>,
+) -> impl Bundle {
+    (
+        name,
+        EndGameDisplay,
+        DespawnOnRestart,
+        Node {
+            width: Val::Percent(90.0),
+            height: Val::Percent(90.0),
+            position_type: PositionType::Absolute,
+            left: Val::Percent(5.),
+            top: Val::Percent(5.),
+            justify_content: JustifyContent::SpaceAround,
+            align_items: AlignItems::Center,
+            ..default()
+        },
+        BackgroundColor(background_color),
+        children![
+            (
+                Node { ..default() },
+                text,
+                TextFont {
+                    font: asset_server.load("fonts/Arbutus-Regular.ttf"),
+                    font_size: 42.0,
+                    ..default()
+                },
+            ),
+            (
+                Name::new("Endgame restart button"),
+                Button,
+                EndGameRestartButton,
+                Node {
+                    // width: Val::Px(60.),
+                    height: Val::Px(40.),
+                    ..default()
+                },
+                BackgroundColor(GNOME_THROW_OUTLINE),
+                children![(
+                    Text::new("Double Click to Restart"),
+                    TextFont {
+                        font: asset_server.load("fonts/Arbutus-Regular.ttf"),
+                        font_size: 36.0,
+                        ..default()
+                    },
+                )]
+            )
+        ],
+    )
+}
+
+fn end_game_button_system(
+    q_interactions: Query<
+        &Interaction,
+        (
+            Changed<Interaction>,
+            With<Button>,
+            With<EndGameRestartButton>,
+        ),
+    >,
+    mut restart_events: EventWriter<RestartGameEvent>,
+) {
+    for interaction in q_interactions {
+        if *interaction == Interaction::Pressed {
+            info!("Press endgame restart button");
+            restart_events.write_default();
         }
     }
 }

@@ -38,3 +38,8 @@ pub const PLAYER_THROW_OUTLINE: Color = Color::srgb(0.051, 0.302, 0.282);
 
 /// #076237
 pub const GNOME_THROW_OUTLINE: Color = Color::srgb(0.027, 0.384, 0.216);
+
+/// #ca632d
+pub const LOSER_BACKGROUND: Color = Color::srgb(0.792, 0.388, 0.176);
+/// #bce7ff
+pub const WINNER_BACKGROUND: Color = Color::srgb(0.737, 0.906, 1.0);

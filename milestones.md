@@ -38,8 +38,8 @@
 - [x] harvest 3 daisies in a row to make a Daisy Chain. A nearby Gnome will throw it to you.
 - [x] Sell a Daisy Chain for money
 - [x] Spend money on seedlings (they are no longer free)
-- [ ] Win condition: $150
-- [ ] Lose condition: no money and not enough seeds or daisies to win
+- [x] Win condition: $150
+- [x] Lose condition: no money and not enough seeds or daisies to win
 - [x] UI for resetting the game on game over
 
 ## Milestone 6
