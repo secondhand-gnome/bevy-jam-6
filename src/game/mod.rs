@@ -1,9 +1,11 @@
 mod barn;
+mod coin;
 mod despawn;
 mod enemy;
 mod farm;
 mod health;
 pub mod level;
+mod lifespan;
 mod physics;
 mod plant;
 pub mod player;
@@ -23,8 +25,10 @@ pub(super) fn plugin(app: &mut App) {
 
     app.add_plugins((
         health::plugin,
+        lifespan::plugin,
         plant::plugin,
         enemy::plugin,
+        coin::plugin,
         farm::plugin,
         level::plugin,
         player::plugin,

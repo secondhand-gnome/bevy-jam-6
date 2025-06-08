@@ -1,9 +1,11 @@
 use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
+use crate::game::coin::GetCoinEvent;
 use crate::game::despawn::DespawnOnRestart;
 use crate::game::farm::{BankAccount, BankAccountUpdateEvent};
 use crate::game::health::Health;
+use crate::game::lifespan::LifespanTimer;
 use crate::game::physics::GameLayer;
 use crate::theme::palette::{GNOME_THROW_OUTLINE, PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
 use avian2d::prelude::{
@@ -32,7 +34,7 @@ pub const PINEAPPLE_SPREAD_DISTANCE: f32 = 25.;
 
 const FIREBALL_RADIUS_PX: f32 = 30.;
 const FIREBALL_START_OFFSET_PX: f32 = 40.;
-const FIREBALL_LIFETIME_S: f32 = 1.0;
+const FIREBALL_LIFESPAN_S: f32 = 1.0;
 const FIREBALL_MOVE_SPEED: f32 = 15.0;
 const FIREBALL_DAMAGE: i32 = 2;
 
@@ -60,7 +62,6 @@ pub(super) fn plugin(app: &mut App) {
             damage_plants,
             tick_growth,
             spew_fire,
-            tick_fireball_lifetime,
             burn_stuff,
             form_daisy_chains,
             sell_daisy_chains,
@@ -113,7 +114,7 @@ fn fireball(
             image: plant_assets.fireball.clone(),
             ..default()
         },
-        FireballLifeTimer(Timer::from_seconds(FIREBALL_LIFETIME_S, TimerMode::Once)),
+        LifespanTimer(Timer::from_seconds(FIREBALL_LIFESPAN_S, TimerMode::Once)),
         Transform::from_translation(
             origin + FIREBALL_START_OFFSET_PX * direction.extend(0.).normalize(),
         ),
@@ -153,10 +154,6 @@ impl Fireball {
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Reflect)]
 #[reflect(Component)]
 pub struct Burnable;
-
-#[derive(Component, Debug, Clone, PartialEq, Eq, Default, Reflect)]
-#[reflect(Component)]
-struct FireballLifeTimer(Timer);
 
 #[derive(Resource, Asset, Clone, Reflect)]
 #[reflect(Resource)]
@@ -242,6 +239,7 @@ pub struct SpewFireEvent {
 #[derive(Event, Debug)]
 pub struct SellDaisyChainEvent {
     daisy_entities: Vec<Entity>,
+    position: Vec3,
 }
 
 pub fn plant_collision_check(plant_position: Vec2, hit_position: Vec2) -> bool {
@@ -423,19 +421,6 @@ fn tick_growth(
     }
 }
 
-fn tick_fireball_lifetime(
-    mut commands: Commands,
-    q_fireballs: Query<(Entity, &mut FireballLifeTimer), With<Fireball>>,
-    time: Res<Time>,
-) {
-    for (entity, mut timer) in q_fireballs {
-        timer.0.tick(time.delta());
-        if timer.0.just_finished() {
-            commands.entity(entity).try_despawn();
-        }
-    }
-}
-
 fn burn_stuff(
     mut commands: Commands,
     mut q_fireballs: Query<(Entity, &Transform, &mut Fireball)>,
@@ -507,6 +492,7 @@ fn form_daisy_chains(
     let daisies: Vec<_> = q_plants
         .iter()
         .filter(|(_, _, p)| p.plant_type == PlantType::Daisy)
+        .take(DAISY_CHAIN_LENGTH)
         .collect();
 
     // Find 3 daisies next to each other
@@ -515,12 +501,32 @@ fn form_daisy_chains(
     if daisies.len() < DAISY_CHAIN_LENGTH {
         return;
     }
-    let daisy_entities: Vec<_> = daisies
-        .iter()
-        .map(|(e, _, _)| *e)
-        .take(DAISY_CHAIN_LENGTH)
-        .collect();
-    sell_events.write(SellDaisyChainEvent { daisy_entities });
+    let daisy_entities: Vec<_> = daisies.iter().map(|(e, _, _)| *e).collect();
+    let daisy_positions: Vec<_> = daisies.iter().map(|(_, t, _)| t.translation).collect();
+    sell_events.write(SellDaisyChainEvent {
+        daisy_entities,
+        position: avg_pos(&daisy_positions),
+    });
+}
+
+fn avg_pos(positions: &Vec<Vec3>) -> Vec3 {
+    if positions.is_empty() {
+        warn!("Empty list, no average");
+        return Vec3::ZERO;
+    }
+
+    let mut sum_x = 0.;
+    let mut sum_y = 0.;
+    let mut sum_z = 0.;
+
+    for pos in positions {
+        sum_x += pos.x;
+        sum_y += pos.y;
+        sum_z += pos.z;
+    }
+
+    let count = positions.len() as f32;
+    Vec3::new(sum_x / count, sum_y / count, sum_z / count)
 }
 
 fn sell_daisy_chains(
@@ -528,6 +534,7 @@ fn sell_daisy_chains(
     mut sell_events: EventReader<SellDaisyChainEvent>,
     mut q_bank_account: Query<&mut BankAccount>,
     mut bank_account_update_events: EventWriter<BankAccountUpdateEvent>,
+    mut get_coin_events: EventWriter<GetCoinEvent>,
 ) {
     for ev in sell_events.read() {
         info!("Selling daisy chain: {:?}", ev.daisy_entities.iter());
@@ -542,6 +549,7 @@ fn sell_daisy_chains(
         bank_account_update_events.write(BankAccountUpdateEvent);
 
         // TODO spawn a coin animation, play a coin sound
+        get_coin_events.write(GetCoinEvent(ev.position));
     }
 }
 
