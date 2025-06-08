@@ -7,6 +7,7 @@ use crate::game::farm::{BankAccount, BankAccountUpdateEvent};
 use crate::game::health::Health;
 use crate::game::lifespan::LifespanTimer;
 use crate::game::physics::GameLayer;
+use crate::game::smoke::SpawnSmokeEvent;
 use crate::theme::palette::{GNOME_THROW_OUTLINE, PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
 use avian2d::prelude::{
     Collider, CollisionEventsEnabled, CollisionLayers, CollisionStarted, LinearVelocity, RigidBody,
@@ -426,6 +427,7 @@ fn burn_stuff(
     mut q_fireballs: Query<(Entity, &Transform, &mut Fireball)>,
     mut q_burnables: Query<(Entity, &mut Health, &Transform), With<Burnable>>,
     mut collision_event_reader: EventReader<CollisionStarted>,
+    mut spawn_smoke_events: EventWriter<SpawnSmokeEvent>,
     plant_assets: Res<PlantAssets>,
 ) {
     if collision_event_reader.is_empty() {
@@ -477,11 +479,12 @@ fn burn_stuff(
         commands.entity(*fireball_entity).try_despawn();
         fireball.deactivate();
 
-        // TODO make smoke
         commands.spawn((
             sound_effect(plant_assets.burn_sound.clone()),
             Transform::from_translation(burnable_pos),
         ));
+
+        spawn_smoke_events.write(SpawnSmokeEvent(burnable_pos));
     }
 }
 
