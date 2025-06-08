@@ -474,7 +474,6 @@ fn burn_stuff(
             continue;
         };
 
-        // TODO write a DamageEnemyEvent instead of directly affecting health here
         burnable_health.reduce(FIREBALL_DAMAGE);
         commands.entity(*fireball_entity).try_despawn();
         fireball.deactivate();

@@ -7,8 +7,8 @@ use crate::game::despawn::DespawnOnRestart;
 use crate::game::health::Health;
 use crate::game::physics::GameLayer;
 use crate::game::plant::{
-    Burnable, DRAGONFRUIT_STRENGTH, DamagePlantEvent, GNOME_STRENGTH, PINEAPPLE_SPREAD_DISTANCE,
-    PINEAPPLE_STRENGTH, Plant, PlantType, SowPlantEvent, SpewFireEvent,
+    Burnable, DRAGONFRUIT_STRENGTH, DamagePlantEvent, GNOME_STRENGTH, GrowthTimer,
+    PINEAPPLE_SPREAD_DISTANCE, PINEAPPLE_STRENGTH, Plant, PlantType, SowPlantEvent, SpewFireEvent,
 };
 use crate::game::player::Player;
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
@@ -227,7 +227,7 @@ fn pursue_plants(
         ),
         With<Enemy>,
     >,
-    q_plants: Query<(Entity, &Transform, &Plant)>,
+    q_plants: Query<(Entity, &Transform, &Plant, Option<&GrowthTimer>)>,
     q_player: Query<&Transform, With<Player>>,
     mut damage_plant_events: EventWriter<DamagePlantEvent>,
     mut damage_enemy_events: EventWriter<DamageEnemyEvent>,
@@ -250,12 +250,13 @@ fn pursue_plants(
 
         let mut plant_vectors: Vec<_> = q_plants
             .iter()
-            .map(|(entity, plant_transform, plant)| {
+            .map(|(entity, plant_transform, plant, opt_growth_timer)| {
                 (
                     entity,
                     plant_transform.translation - enemy_transform.translation,
                     plant,
                     plant_transform,
+                    opt_growth_timer.is_some(),
                 )
             })
             .collect();
@@ -269,7 +270,8 @@ fn pursue_plants(
 
         // Sort plants by distance from this enemy
         plant_vectors.sort_by(|a, b| a.1.length().partial_cmp(&b.1.length()).unwrap());
-        let (plant_entity, plant_vector, plant, plant_transform) = plant_vectors.first().unwrap();
+        let (plant_entity, plant_vector, plant, plant_transform, is_growing) =
+            plant_vectors.first().unwrap();
 
         if plant_vector.length() < EAT_RADIUS_PX {
             // Eat the plant
@@ -284,62 +286,64 @@ fn pursue_plants(
                     amount: BITE_STRENGTH,
                 });
 
-                match plant.plant_type() {
-                    PlantType::Daisy => {
-                        // Do nothing
-                    }
-                    PlantType::Pineapple => {
-                        // Enemy takes damage
-                        damage_enemy_events.write(DamageEnemyEvent {
-                            enemy_entity: enemy,
-                            amount: PINEAPPLE_STRENGTH,
-                        });
+                if !is_growing {
+                    match plant.plant_type() {
+                        PlantType::Daisy => {
+                            // Do nothing
+                        }
+                        PlantType::Pineapple => {
+                            // Enemy takes damage
+                            damage_enemy_events.write(DamageEnemyEvent {
+                                enemy_entity: enemy,
+                                amount: PINEAPPLE_STRENGTH,
+                            });
 
-                        commands.spawn((
-                            sound_effect(enemy_assets.rat_damage_sound.clone()),
-                            Transform::from_translation(enemy_transform.translation),
-                        ));
+                            commands.spawn((
+                                sound_effect(enemy_assets.rat_damage_sound.clone()),
+                                Transform::from_translation(enemy_transform.translation),
+                            ));
 
-                        let rng = &mut rand::thread_rng();
-                        let angle: f32 = rng.gen_range(0.0..TAU);
-                        let spawn_vec2 = PINEAPPLE_SPREAD_DISTANCE
-                            * Vec2::new(cos(angle), sin(angle)).normalize();
-                        let spawn_pos = plant_transform.translation.xy() + spawn_vec2;
+                            let rng = &mut rand::thread_rng();
+                            let angle: f32 = rng.gen_range(0.0..TAU);
+                            let spawn_vec2 = PINEAPPLE_SPREAD_DISTANCE
+                                * Vec2::new(cos(angle), sin(angle)).normalize();
+                            let spawn_pos = plant_transform.translation.xy() + spawn_vec2;
 
-                        // TODO play sound on spawn
-                        sow_plant_events.write(SowPlantEvent {
-                            position: spawn_pos,
-                            seed_type: PlantType::Pineapple,
-                        });
-                    }
-                    PlantType::Dragonfruit => {
-                        // Enemy takes damage
-                        damage_enemy_events.write(DamageEnemyEvent {
-                            enemy_entity: enemy,
-                            amount: DRAGONFRUIT_STRENGTH,
-                        });
+                            // TODO play sound on spawn
+                            sow_plant_events.write(SowPlantEvent {
+                                position: spawn_pos,
+                                seed_type: PlantType::Pineapple,
+                            });
+                        }
+                        PlantType::Dragonfruit => {
+                            // Enemy takes damage
+                            damage_enemy_events.write(DamageEnemyEvent {
+                                enemy_entity: enemy,
+                                amount: DRAGONFRUIT_STRENGTH,
+                            });
 
-                        spew_fire_events.write(SpewFireEvent {
-                            plant_entity: *plant_entity,
-                            origin: plant_transform.translation,
-                        });
+                            spew_fire_events.write(SpewFireEvent {
+                                plant_entity: *plant_entity,
+                                origin: plant_transform.translation,
+                            });
 
-                        commands.spawn((
-                            sound_effect(enemy_assets.rat_damage_sound.clone()),
-                            Transform::from_translation(enemy_transform.translation),
-                        ));
-                    }
-                    PlantType::Gnome => {
-                        // TODO play an animation for gnome headbutt
-                        // Enemy takes damage
-                        damage_enemy_events.write(DamageEnemyEvent {
-                            enemy_entity: enemy,
-                            amount: GNOME_STRENGTH,
-                        });
-                        commands.spawn((
-                            sound_effect(enemy_assets.headbonk_sound.clone()),
-                            Transform::from_translation(enemy_transform.translation),
-                        ));
+                            commands.spawn((
+                                sound_effect(enemy_assets.rat_damage_sound.clone()),
+                                Transform::from_translation(enemy_transform.translation),
+                            ));
+                        }
+                        PlantType::Gnome => {
+                            // TODO play an animation for gnome headbutt
+                            // Enemy takes damage
+                            damage_enemy_events.write(DamageEnemyEvent {
+                                enemy_entity: enemy,
+                                amount: GNOME_STRENGTH,
+                            });
+                            commands.spawn((
+                                sound_effect(enemy_assets.headbonk_sound.clone()),
+                                Transform::from_translation(enemy_transform.translation),
+                            ));
+                        }
                     }
                 }
 
