@@ -299,7 +299,7 @@ fn end_game(
         }
         commands.spawn(end_game_text(
             Name::new("GameOverText"),
-            Text::new("LOSE"),
+            Text::new("You ran out of money"),
             LOSER_BACKGROUND,
             asset_server,
         ));

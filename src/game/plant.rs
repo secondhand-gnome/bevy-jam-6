@@ -17,7 +17,7 @@ use bevy_vector_shapes::prelude::*;
 use rand::prelude::SliceRandom;
 
 const PLANT_RADIUS_PX: f32 = 30.;
-pub const GNOME_THROW_RADIUS_PX: f32 = 240.;
+pub const GNOME_THROW_RADIUS_PX: f32 = 500.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
 const PLANT_MAX_HEALTH: i32 = 5;
 
