@@ -103,6 +103,7 @@ pub struct EnemyAssets {
     rat_walk: Handle<Image>,
     bite_sounds: Vec<Handle<AudioSource>>,
     rat_damage_sound: Handle<AudioSource>,
+    headbonk_sound: Handle<AudioSource>,
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Default, Reflect)]
@@ -163,6 +164,7 @@ impl FromWorld for EnemyAssets {
                 assets.load("audio/sound_effects/bite/bite3.ogg"),
             ],
             rat_damage_sound: assets.load("audio/sound_effects/rat_damage.ogg"),
+            headbonk_sound: assets.load("audio/sound_effects/headbonk.ogg"),
         }
     }
 }
@@ -323,12 +325,15 @@ fn pursue_plants(
                     }
                     PlantType::Gnome => {
                         // TODO play an animation for gnome headbutt
-                        // TODO play a sound for gnome headbutt
                         // Enemy takes damage
                         damage_enemy_events.write(DamageEnemyEvent {
                             enemy_entity: enemy,
                             amount: GNOME_STRENGTH,
                         });
+                        commands.spawn((
+                            sound_effect(enemy_assets.headbonk_sound.clone()),
+                            Transform::from_translation(enemy_transform.translation),
+                        ));
                     }
                 }
 
