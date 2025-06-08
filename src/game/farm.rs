@@ -213,6 +213,8 @@ fn on_player_click(
                 PLAYER_THROW_RADIUS_PX,
                 GNOME_THROW_RADIUS_PX,
             );
+            
+            // TODO restrict throwing just to within the farm territory
 
             if seed_path.is_none() {
                 info!(

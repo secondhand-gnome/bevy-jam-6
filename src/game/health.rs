@@ -93,8 +93,6 @@ fn remove_dead(
                 sound_effect(health_assets.death_sound.clone()),
                 Transform::from_translation(transform.translation),
             ));
-
-            // TODO spawn particle effects
         }
     }
 }

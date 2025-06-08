@@ -497,9 +497,7 @@ fn form_daisy_chains(
         .take(DAISY_CHAIN_LENGTH)
         .collect();
 
-    // Find 3 daisies next to each other
-    // TODO implement "closest triplet" algorithm
-    // TODO For now just pick any 3
+    // Find 3 daisies
     if daisies.len() < DAISY_CHAIN_LENGTH {
         return;
     }
@@ -550,7 +548,6 @@ fn sell_daisy_chains(
         bank_account.credit(DAISY_CHAIN_VALUE);
         bank_account_update_events.write(BankAccountUpdateEvent);
 
-        // TODO spawn a coin animation, play a coin sound
         get_coin_events.write(GetCoinEvent(ev.position));
     }
 }
@@ -559,7 +556,6 @@ fn damage_plants(
     mut q_plants: Query<(Entity, &mut Health), With<Plant>>,
     mut damage_plant_events: EventReader<DamagePlantEvent>,
 ) {
-    // TODO particle effects on plant damage
     for ev in damage_plant_events.read() {
         for (plant_entity, mut plant_health) in q_plants.iter_mut() {
             if plant_entity == ev.plant_entity {

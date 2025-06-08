@@ -5,6 +5,7 @@ use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use crate::game::despawn::DespawnOnRestart;
 use crate::game::health::Health;
+use crate::game::lifespan::LifespanTimer;
 use crate::game::physics::GameLayer;
 use crate::game::plant::{
     Burnable, DRAGONFRUIT_STRENGTH, DamagePlantEvent, GNOME_STRENGTH, GrowthTimer,
@@ -25,11 +26,17 @@ const ENEMY_RADIUS: f32 = 30.0;
 const ENEMY_DESPAWN_DISTANCE: f32 = 1500.0;
 const EAT_RADIUS_PX: f32 = 80.0;
 const SPAWN_INTERVAL_S: f32 = 1.0;
+
 const ENEMY_MOVE_SPEED: f32 = 240.0; // TODO tune down
 const ENEMY_SPAWN_LIMIT: usize = 5; // TODO tune
+
 const BITE_COOLDOWN_S: f32 = 2.5;
 const BITE_STRENGTH: i32 = 1;
 const ENEMY_MAX_HEALTH: i32 = 5;
+
+const STAR_LIFETIME_S: f32 = 0.25;
+const STAR_SCALE: f32 = 0.25;
+const STAR_Z_LAYER: f32 = 2.;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Enemy>();
@@ -105,6 +112,8 @@ pub struct EnemyAssets {
     #[dependency]
     rat_walk: Handle<Image>,
     #[dependency]
+    star_particles: Vec<Handle<Image>>,
+    #[dependency]
     bite_sounds: Vec<Handle<AudioSource>>,
     #[dependency]
     rat_damage_sound: Handle<AudioSource>,
@@ -130,6 +139,7 @@ struct BiteCooldown(Timer);
 pub struct DamageEnemyEvent {
     pub enemy_entity: Entity,
     pub amount: i32,
+    pub position: Vec3,
 }
 
 impl FromWorld for EnemyAssets {
@@ -164,6 +174,17 @@ impl FromWorld for EnemyAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+            star_particles: vec![
+                "images/particles/star/star_04.png",
+                "images/particles/star/star_05.png",
+            ]
+            .into_iter()
+            .map(|path| {
+                assets.load_with_settings(path, |settings: &mut ImageLoaderSettings| {
+                    settings.sampler = ImageSampler::nearest();
+                })
+            })
+            .collect::<Vec<Handle<Image>>>(),
             bite_sounds: vec![
                 assets.load("audio/sound_effects/bite/bite1.ogg"),
                 assets.load("audio/sound_effects/bite/bite2.ogg"),
@@ -296,6 +317,7 @@ fn pursue_plants(
                             damage_enemy_events.write(DamageEnemyEvent {
                                 enemy_entity: enemy,
                                 amount: PINEAPPLE_STRENGTH,
+                                position: enemy_transform.translation,
                             });
 
                             commands.spawn((
@@ -309,7 +331,7 @@ fn pursue_plants(
                                 * Vec2::new(cos(angle), sin(angle)).normalize();
                             let spawn_pos = plant_transform.translation.xy() + spawn_vec2;
 
-                            // TODO play sound on spawn
+                            // TODO Pineapples should start with less health when spawned by other pineapples
                             sow_plant_events.write(SowPlantEvent {
                                 position: spawn_pos,
                                 seed_type: PlantType::Pineapple,
@@ -320,6 +342,7 @@ fn pursue_plants(
                             damage_enemy_events.write(DamageEnemyEvent {
                                 enemy_entity: enemy,
                                 amount: DRAGONFRUIT_STRENGTH,
+                                position: enemy_transform.translation,
                             });
 
                             spew_fire_events.write(SpewFireEvent {
@@ -338,6 +361,7 @@ fn pursue_plants(
                             damage_enemy_events.write(DamageEnemyEvent {
                                 enemy_entity: enemy,
                                 amount: GNOME_STRENGTH,
+                                position: enemy_transform.translation,
                             });
                             commands.spawn((
                                 sound_effect(enemy_assets.headbonk_sound.clone()),
@@ -395,13 +419,25 @@ fn tick_bite_cooldowns(
 }
 
 fn damage_enemies(
+    mut commands: Commands,
     mut q_enemies: Query<(Entity, &mut Health), With<Enemy>>,
     mut damage_enemy_events: EventReader<DamageEnemyEvent>,
+    enemy_assets: Res<EnemyAssets>,
 ) {
-    // TODO particle effects on enemy damage
     for ev in damage_enemy_events.read() {
         for (entity, mut health) in q_enemies.iter_mut() {
             if entity == ev.enemy_entity {
+                commands.spawn((
+                    Name::new("Star particle"),
+                    DespawnOnRestart,
+                    LifespanTimer(Timer::from_seconds(STAR_LIFETIME_S, TimerMode::Once)),
+                    Sprite {
+                        image: random_star_particle(&enemy_assets),
+                        ..default()
+                    },
+                    Transform::from_translation(ev.position.with_z(STAR_Z_LAYER))
+                        .with_scale(Vec3::splat(STAR_SCALE)),
+                ));
                 health.reduce(ev.amount);
                 info!(
                     "Damage enemy {:?} for {} (now at {:?})",
@@ -410,4 +446,9 @@ fn damage_enemies(
             }
         }
     }
+}
+
+fn random_star_particle(enemy_assets: &EnemyAssets) -> Handle<Image> {
+    let rng = &mut rand::thread_rng();
+    enemy_assets.star_particles.choose(rng).unwrap().clone()
 }

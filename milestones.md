@@ -46,6 +46,7 @@
 
 - [x] If a pineapple is triggered, it spreads pineapples nearby
 - [ ] If a dragonfruit's fire hits another plant, it causes fire to spread
+- [ ] Zoom in/out on scroll or pinch
 
 ## Milestone 7
 
