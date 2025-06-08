@@ -333,7 +333,7 @@ fn pursue_plants(
                             let spawn_pos = plant_transform.translation.xy() + spawn_vec2;
 
                             if generation < PINEAPPLE_MAX_GENERATION {
-                                info!("Spawning new pineapple (generation={})", generation+1);
+                                info!("Spawning new pineapple (generation={})", generation + 1);
                                 sow_plant_events.write(SowPlantEvent {
                                     position: spawn_pos,
                                     seed_type: PlantType::Pineapple(generation + 1),

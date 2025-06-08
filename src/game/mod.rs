@@ -11,8 +11,8 @@ mod plant;
 pub mod player;
 mod player_animation;
 mod seed;
-pub mod ui;
 mod smoke;
+pub mod ui;
 
 use crate::game::player::{PlayerClickEvent, ThrowSeedEvent};
 use avian2d::PhysicsPlugins;

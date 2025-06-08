@@ -68,7 +68,7 @@ fn smoke(transform: Transform, smoke_assets: &SmokeAssets) -> impl Bundle {
         LinearVelocity(SMOKE_LIFT_SPEED * Vec2::Y),
         transform.with_scale(Vec3::splat(SMOKE_SCALE)),
         Sprite {
-            image: random_smoke_particle(&smoke_assets),
+            image: random_smoke_particle(smoke_assets),
             ..default()
         },
     )

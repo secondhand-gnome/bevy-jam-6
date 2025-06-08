@@ -1,5 +1,5 @@
 use crate::game::farm::{BankAccount, BankAccountUpdateEvent, RestartGameEvent, WINNING_BALANCE};
-use crate::game::plant::{PlantType, SeedSelection, PINEAPPLE_DEFAULT_GENERATION};
+use crate::game::plant::{PINEAPPLE_DEFAULT_GENERATION, PlantType, SeedSelection};
 use bevy::prelude::*;
 use bevy_cobweb::prelude::*;
 use bevy_cobweb_ui::prelude::*;
