@@ -179,7 +179,7 @@ fn on_player_click(
     q_player: Query<&Transform, With<Player>>,
     q_seed_selection: Reactive<SeedSelection>,
     q_farm: Query<&Farm>,
-    q_plants: Query<&Transform, With<Plant>>,
+    q_plants: Query<(&Transform, &Plant)>,
     q_grown_plants: Query<(&Transform, &Plant), Without<GrowthTimer>>,
     mut q_bank_account: Query<&mut BankAccount>,
     mut bank_account_update_events: EventWriter<BankAccountUpdateEvent>,
@@ -231,9 +231,9 @@ fn on_player_click(
                 can_sow = false;
             }
 
-            for plant_transform in q_plants.iter() {
+            for (plant_transform, plant) in q_plants.iter() {
                 let plant_position = plant_transform.translation.xy();
-                if plant_collision_check(plant_position, click_position) {
+                if plant_collision_check(plant_position, click_position, plant.plant_type()) {
                     // Plant already here
                     println!(
                         "Can't plant at {:?} - plant already present at {:?}",

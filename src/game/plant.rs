@@ -19,7 +19,6 @@ use bevy_vector_shapes::painter::ShapePainter;
 use bevy_vector_shapes::prelude::*;
 use rand::prelude::SliceRandom;
 
-const PLANT_RADIUS_PX: f32 = 30.;
 pub const GNOME_THROW_RADIUS_PX: f32 = 500.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
 
@@ -32,6 +31,7 @@ pub const DRAGONFRUIT_STRENGTH: i32 = 1;
 
 pub const PINEAPPLE_SPREAD_DISTANCE: f32 = 25.;
 const PINEAPPLE_HEALTH_CURVE: [i32; 3] = [5, 3, 1];
+const PINEAPPLE_RADIUS_CURVE: [f32; 3] = [60., 45., 25.];
 pub const PINEAPPLE_DEFAULT_GENERATION: i32 = 0;
 pub const PINEAPPLE_MAX_GENERATION: i32 = PINEAPPLE_HEALTH_CURVE.len() as i32 - 1;
 
@@ -84,7 +84,7 @@ fn plant(position: Vec2, plant_assets: &PlantAssets, plant_type: PlantType) -> i
         Plant { plant_type },
         RigidBody::Static,
         DespawnOnRestart,
-        Collider::circle(PLANT_RADIUS_PX),
+        Collider::circle(plant_radius(plant_type)),
         CollisionLayers::new([GameLayer::Plant], [GameLayer::Plant, GameLayer::Enemy]),
         Sprite {
             image: plant_assets.seedling.clone(),
@@ -104,6 +104,17 @@ fn plant_max_health(plant_type: PlantType) -> i32 {
             .unwrap_or(&0),
         PlantType::Dragonfruit => 5,
         PlantType::Gnome => 10,
+    }
+}
+
+fn plant_radius(plant_type: PlantType) -> f32 {
+    match plant_type {
+        PlantType::Daisy => 30.,
+        PlantType::Pineapple(generation) => *PINEAPPLE_RADIUS_CURVE
+            .get(generation as usize)
+            .unwrap_or(&(0.)),
+        PlantType::Dragonfruit => 45.,
+        PlantType::Gnome => 30.,
     }
 }
 
@@ -259,9 +270,13 @@ pub struct SellDaisyChainEvent {
     position: Vec3,
 }
 
-pub fn plant_collision_check(plant_position: Vec2, hit_position: Vec2) -> bool {
+pub fn plant_collision_check(
+    plant_position: Vec2,
+    hit_position: Vec2,
+    plant_type: PlantType,
+) -> bool {
     let difference = plant_position - hit_position;
-    difference.length() < PLANT_RADIUS_PX * 2.
+    difference.length() < plant_radius(plant_type) * 2.
 }
 
 impl FromWorld for PlantAssets {
@@ -343,39 +358,40 @@ fn sow_plants(
     }
 }
 
-fn draw_plant_circles(mut painter: ShapePainter, q_plants: Query<&Transform, With<Plant>>) {
+fn draw_plant_circles(mut painter: ShapePainter, q_plants: Query<(&Transform, &Plant)>) {
     painter.color = PLANT_GROWTH_OUTLINE;
     painter.hollow = true;
     painter.thickness = 0.5;
-    for plant_transform in q_plants {
+    for (plant_transform, plant) in q_plants {
         painter.transform.translation = plant_transform.translation;
-        painter.circle(PLANT_RADIUS_PX);
+        painter.circle(plant_radius(plant.plant_type));
     }
 }
 
 fn draw_growth(
     mut painter: ShapePainter,
-    q_growing_plants: Query<(&mut Transform, &mut GrowthTimer), With<Plant>>,
+    q_growing_plants: Query<(&mut Transform, &mut GrowthTimer, &Plant)>,
 ) {
-    const PROGRESS_HEIGHT_PX: f32 = PLANT_RADIUS_PX * 0.2;
-    const PROGRESS_LENGTH_PX: f32 = PLANT_RADIUS_PX * 1.;
-    const PROGRESS_DIMENS: Vec2 = Vec2::new(PROGRESS_LENGTH_PX, PROGRESS_HEIGHT_PX);
-    const PROGRESS_OFFSET: Vec3 = Vec3::new(0., -1.1 * PLANT_RADIUS_PX, 0.);
+    for (transform, growth_timer, plant) in q_growing_plants {
+        let plant_radius = plant_radius(plant.plant_type());
+        let progress_height_px = plant_radius * 0.2;
+        let progress_length_px = plant_radius * 1.;
+        let progress_dimens = Vec2::new(progress_length_px, progress_height_px);
+        let progress_offset = Vec3::new(0., -1.1 * plant_radius, 0.);
 
-    for (transform, growth_timer) in q_growing_plants {
         // Draw the remaining time
-        painter.transform.translation = transform.translation + PROGRESS_OFFSET;
+        painter.transform.translation = transform.translation + progress_offset;
         painter.hollow = true;
         painter.thickness = 0.5;
         painter.color = PLANT_GROWTH_OUTLINE;
-        painter.rect(PROGRESS_DIMENS);
+        painter.rect(progress_dimens);
 
         let progress = growth_timer.0.fraction();
         painter.hollow = false;
         painter.color = PLANT_GROWTH_FOREGROUND;
         painter.rect(Vec2::new(
-            PROGRESS_DIMENS.x * progress,
-            PROGRESS_DIMENS.y * 0.8,
+            progress_dimens.x * progress,
+            progress_dimens.y * 0.8,
         ));
     }
 }
