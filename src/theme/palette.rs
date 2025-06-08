@@ -6,10 +6,10 @@ pub const LABEL_TEXT: Color = Color::srgb(0.867, 0.827, 0.412);
 /// #fcfbcc
 pub const HEADER_TEXT: Color = Color::srgb(0.988, 0.984, 0.800);
 
-/// #ececec
-pub const BUTTON_TEXT: Color = Color::srgb(0.925, 0.925, 0.925);
-/// #4666bf
-pub const BUTTON_BACKGROUND: Color = Color::srgb(0.275, 0.400, 0.750);
+/// #28824e
+pub const BUTTON_TEXT: Color = Color::srgb(0.157, 0.510, 0.306);
+/// #bce7ff
+pub const BUTTON_BACKGROUND: Color = Color::srgb(0.737, 0.906, 1.0);
 /// #6299d1
 pub const BUTTON_HOVERED_BACKGROUND: Color = Color::srgb(0.384, 0.600, 0.820);
 /// #3d4999
