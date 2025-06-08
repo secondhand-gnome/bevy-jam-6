@@ -29,9 +29,10 @@ pub const GNOME_STRENGTH: i32 = 1;
 pub const PINEAPPLE_STRENGTH: i32 = 2;
 pub const DRAGONFRUIT_STRENGTH: i32 = 1;
 
-pub const PINEAPPLE_SPREAD_DISTANCE: f32 = 25.;
+pub const PINEAPPLE_SPREAD_DISTANCE: f32 = 45.;
 const PINEAPPLE_HEALTH_CURVE: [i32; 3] = [5, 3, 1];
 const PINEAPPLE_RADIUS_CURVE: [f32; 3] = [60., 45., 25.];
+const PINEAPPLE_SCALE_CURVE: [f32; 3] = [64., 48., 32.];
 pub const PINEAPPLE_DEFAULT_GENERATION: i32 = 0;
 pub const PINEAPPLE_MAX_GENERATION: i32 = PINEAPPLE_HEALTH_CURVE.len() as i32 - 1;
 
@@ -435,7 +436,11 @@ fn tick_growth(
                     },
                     custom_size: match plant.plant_type {
                         PlantType::Daisy => None,
-                        PlantType::Pineapple(_) => Some(Vec2::splat(64.)),
+                        PlantType::Pineapple(generation) => Some(Vec2::splat(
+                            *PINEAPPLE_SCALE_CURVE
+                                .get(generation as usize)
+                                .unwrap_or(&(0.)),
+                        )),
                         PlantType::Dragonfruit => Some(Vec2::splat(64.)),
                         PlantType::Gnome => Some(Vec2::splat(64.)),
                     },
