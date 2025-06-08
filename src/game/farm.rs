@@ -1,5 +1,6 @@
 use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
+use crate::audio::sound_effect;
 use crate::game::despawn::DespawnOnRestart;
 use crate::game::enemy::enemy_spawner;
 use crate::game::plant::{
@@ -43,6 +44,7 @@ pub(super) fn plugin(app: &mut App) {
             on_player_click,
             restart_game,
         )
+            .run_if(resource_exists::<FarmAssets>)
             .in_set(PausableSystems),
     );
 }
@@ -86,6 +88,8 @@ pub struct FarmAssets {
     dirt_a: Handle<Image>,
     #[dependency]
     dirt_b: Handle<Image>,
+    #[dependency]
+    invalid_sound: Handle<AudioSource>,
 }
 
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Reflect)]
@@ -154,6 +158,7 @@ impl FromWorld for FarmAssets {
                     settings.sampler = ImageSampler::nearest();
                 },
             ),
+            invalid_sound: assets.load("audio/sound_effects/invalid.ogg"),
         }
     }
 }
@@ -168,6 +173,7 @@ fn draw_outline(mut painter: ShapePainter, q_farm: Query<&Farm>) {
 }
 
 fn on_player_click(
+    mut commands: Commands,
     mut click_events: EventReader<PlayerClickEvent>,
     mut throw_seed_events: EventWriter<ThrowSeedEvent>,
     q_player: Query<&Transform, With<Player>>,
@@ -177,6 +183,7 @@ fn on_player_click(
     q_grown_plants: Query<(&Transform, &Plant), Without<GrowthTimer>>,
     mut q_bank_account: Query<&mut BankAccount>,
     mut bank_account_update_events: EventWriter<BankAccountUpdateEvent>,
+    farm_assets: Res<FarmAssets>,
 ) {
     if q_farm.single().is_ok() {
         for click_event in click_events.read() {
@@ -212,10 +219,14 @@ fn on_player_click(
                     "No path to throw from {:?} to {:?}",
                     player_position, click_position
                 );
-                // TODO play invalid location sound
+
+                // Play sound for invalid location
+                commands.spawn((
+                    sound_effect(farm_assets.invalid_sound.clone()),
+                    Transform::from_translation(click_position.extend(0.)),
+                ));
                 can_sow = false;
             }
-            // TODO animate the seed along the path
 
             for plant_transform in q_plants.iter() {
                 let plant_position = plant_transform.translation.xy();

@@ -98,11 +98,17 @@ struct Enemy;
 pub struct EnemyAssets {
     #[dependency]
     rat: Handle<Image>,
+    #[dependency]
     rat_dead: Handle<Image>,
+    #[dependency]
     rat_hit: Handle<Image>,
+    #[dependency]
     rat_walk: Handle<Image>,
+    #[dependency]
     bite_sounds: Vec<Handle<AudioSource>>,
+    #[dependency]
     rat_damage_sound: Handle<AudioSource>,
+    #[dependency]
     headbonk_sound: Handle<AudioSource>,
 }
 
