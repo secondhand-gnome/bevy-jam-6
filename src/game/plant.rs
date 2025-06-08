@@ -22,7 +22,6 @@ use rand::prelude::SliceRandom;
 const PLANT_RADIUS_PX: f32 = 30.;
 pub const GNOME_THROW_RADIUS_PX: f32 = 500.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
-const PLANT_MAX_HEALTH: i32 = 5;
 
 pub const DAISY_CHAIN_LENGTH: usize = 3;
 const DAISY_CHAIN_VALUE: f32 = 10.;
@@ -32,6 +31,9 @@ pub const PINEAPPLE_STRENGTH: i32 = 2;
 pub const DRAGONFRUIT_STRENGTH: i32 = 1;
 
 pub const PINEAPPLE_SPREAD_DISTANCE: f32 = 25.;
+const PINEAPPLE_HEALTH_CURVE: [i32; 3] = [5, 3, 1];
+pub const PINEAPPLE_DEFAULT_GENERATION: i32 = 0;
+pub const PINEAPPLE_MAX_GENERATION: i32 = PINEAPPLE_HEALTH_CURVE.len() as i32 - 1;
 
 const FIREBALL_RADIUS_PX: f32 = 30.;
 const FIREBALL_START_OFFSET_PX: f32 = 40.;
@@ -89,9 +91,20 @@ fn plant(position: Vec2, plant_assets: &PlantAssets, plant_type: PlantType) -> i
             ..default()
         },
         GrowthTimer(Timer::from_seconds(DAISY_GROWTH_TIME_S, TimerMode::Once)),
-        Health::new(PLANT_MAX_HEALTH),
+        Health::new(plant_max_health(plant_type)),
         Transform::from_translation(position.extend(1.)),
     )
+}
+
+fn plant_max_health(plant_type: PlantType) -> i32 {
+    match plant_type {
+        PlantType::Daisy => 2,
+        PlantType::Pineapple(generation) => *PINEAPPLE_HEALTH_CURVE
+            .get(generation as usize)
+            .unwrap_or(&0),
+        PlantType::Dragonfruit => 5,
+        PlantType::Gnome => 10,
+    }
 }
 
 fn fireball(
@@ -187,7 +200,10 @@ pub struct PlantAssets {
 pub enum PlantType {
     #[default]
     Daisy,
-    Pineapple,
+
+    // Pineapple with generation number
+    Pineapple(i32),
+
     Dragonfruit,
     Gnome,
 }
@@ -196,7 +212,7 @@ impl PlantType {
     pub fn price(&self) -> f32 {
         match self {
             PlantType::Daisy => DAISY_PRICE,
-            PlantType::Pineapple => PINEAPPLE_PRICE,
+            PlantType::Pineapple(_) => PINEAPPLE_PRICE,
             PlantType::Dragonfruit => DRAGONFRUIT_PRICE,
             PlantType::Gnome => GNOME_PRICE,
         }
@@ -397,13 +413,13 @@ fn tick_growth(
                 .insert(Sprite {
                     image: match plant.plant_type {
                         PlantType::Daisy => plant_assets.daisy.clone(),
-                        PlantType::Pineapple => plant_assets.pineapple.clone(),
+                        PlantType::Pineapple(_) => plant_assets.pineapple.clone(),
                         PlantType::Dragonfruit => plant_assets.dragonfruit.clone(),
                         PlantType::Gnome => plant_assets.gnome.clone(),
                     },
                     custom_size: match plant.plant_type {
                         PlantType::Daisy => None,
-                        PlantType::Pineapple => Some(Vec2::splat(64.)),
+                        PlantType::Pineapple(_) => Some(Vec2::splat(64.)),
                         PlantType::Dragonfruit => Some(Vec2::splat(64.)),
                         PlantType::Gnome => Some(Vec2::splat(64.)),
                     },

@@ -1,5 +1,5 @@
 use crate::game::farm::{BankAccount, BankAccountUpdateEvent, RestartGameEvent, WINNING_BALANCE};
-use crate::game::plant::{PlantType, SeedSelection};
+use crate::game::plant::{PlantType, SeedSelection, PINEAPPLE_DEFAULT_GENERATION};
 use bevy::prelude::*;
 use bevy_cobweb::prelude::*;
 use bevy_cobweb_ui::prelude::*;
@@ -36,7 +36,7 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                     move |mut c: Commands, mut seed_selection: ReactiveMut<SeedSelection>| {
                         seed_selection
                             .get_mut(&mut c, scene_entity)?
-                            .set_seed_type(PlantType::Pineapple);
+                            .set_seed_type(PlantType::Pineapple(PINEAPPLE_DEFAULT_GENERATION));
                         c.react().broadcast(CurrentSeedUpdate);
                         OK
                     },

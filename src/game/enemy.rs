@@ -9,7 +9,8 @@ use crate::game::lifespan::LifespanTimer;
 use crate::game::physics::GameLayer;
 use crate::game::plant::{
     Burnable, DRAGONFRUIT_STRENGTH, DamagePlantEvent, GNOME_STRENGTH, GrowthTimer,
-    PINEAPPLE_SPREAD_DISTANCE, PINEAPPLE_STRENGTH, Plant, PlantType, SowPlantEvent, SpewFireEvent,
+    PINEAPPLE_MAX_GENERATION, PINEAPPLE_SPREAD_DISTANCE, PINEAPPLE_STRENGTH, Plant, PlantType,
+    SowPlantEvent, SpewFireEvent,
 };
 use crate::game::player::Player;
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
@@ -312,7 +313,7 @@ fn pursue_plants(
                         PlantType::Daisy => {
                             // Do nothing
                         }
-                        PlantType::Pineapple => {
+                        PlantType::Pineapple(generation) => {
                             // Enemy takes damage
                             damage_enemy_events.write(DamageEnemyEvent {
                                 enemy_entity: enemy,
@@ -331,11 +332,12 @@ fn pursue_plants(
                                 * Vec2::new(cos(angle), sin(angle)).normalize();
                             let spawn_pos = plant_transform.translation.xy() + spawn_vec2;
 
-                            // TODO Pineapples should start with less health when spawned by other pineapples
-                            sow_plant_events.write(SowPlantEvent {
-                                position: spawn_pos,
-                                seed_type: PlantType::Pineapple,
-                            });
+                            if generation < PINEAPPLE_MAX_GENERATION {
+                                sow_plant_events.write(SowPlantEvent {
+                                    position: spawn_pos,
+                                    seed_type: PlantType::Pineapple(generation + 1),
+                                });
+                            }
                         }
                         PlantType::Dragonfruit => {
                             // Enemy takes damage
