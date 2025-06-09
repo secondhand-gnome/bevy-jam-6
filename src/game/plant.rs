@@ -292,7 +292,7 @@ pub fn plant_collision_check(
     plant_type: PlantType,
 ) -> bool {
     let difference = plant_position - hit_position;
-    difference.length() < plant_radius(plant_type) * 2.
+    difference.length() < plant_radius(plant_type)
 }
 
 impl FromWorld for PlantAssets {
