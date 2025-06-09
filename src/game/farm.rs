@@ -327,6 +327,7 @@ fn end_game(
             LOSER_BACKGROUND,
             asset_server,
             &farm_assets,
+            false,
         ));
     } else if bank_account.balance >= WINNING_BALANCE {
         commands.spawn(end_game_text(
@@ -335,6 +336,7 @@ fn end_game(
             WINNER_BACKGROUND,
             asset_server,
             &farm_assets,
+            true,
         ));
     } else {
         return;
@@ -352,6 +354,7 @@ fn end_game_text(
     background_color: Color,
     asset_server: Res<AssetServer>,
     farm_assets: &FarmAssets,
+    is_win: bool,
 ) -> impl Bundle {
     (
         name,
@@ -369,14 +372,7 @@ fn end_game_text(
         },
         BackgroundColor(background_color),
         children![
-            (
-                ImageNode::new(farm_assets.chain_cutters.clone()),
-                Node {
-                    min_width: Val::Px(100.),
-                    min_height: Val::Px(100.),
-                    ..default()
-                },
-            ),
+            maybe_chain_cutters(is_win, farm_assets),
             (
                 Name::new("Endgame restart button"),
                 Button,
@@ -394,6 +390,28 @@ fn end_game_text(
             )
         ],
     )
+}
+
+fn maybe_chain_cutters(is_win: bool, farm_assets: &FarmAssets) -> impl Bundle {
+    if is_win {
+        (
+            ImageNode::new(farm_assets.chain_cutters.clone()),
+            Node {
+                min_width: Val::Px(100.),
+                min_height: Val::Px(100.),
+                ..default()
+            },
+        )
+    } else {
+        (
+            ImageNode::new(farm_assets.chain_cutters.clone()),
+            Node {
+                height: Val::Px(0.),
+                width: Val::Px(0.),
+                ..default()
+            },
+        )
+    }
 }
 
 fn end_game_button_system(
