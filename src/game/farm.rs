@@ -89,6 +89,8 @@ pub struct FarmAssets {
     #[dependency]
     dirt_b: Handle<Image>,
     #[dependency]
+    chain_cutters: Handle<Image>,
+    #[dependency]
     invalid_sound: Handle<AudioSource>,
 }
 
@@ -153,6 +155,13 @@ impl FromWorld for FarmAssets {
             ),
             dirt_b: assets.load_with_settings(
                 "images/ground/dirt_b.png",
+                |settings: &mut ImageLoaderSettings| {
+                    // Use `nearest` image sampling to preserve pixel art style.
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+            chain_cutters: assets.load_with_settings(
+                "images/chain_cutters.png",
                 |settings: &mut ImageLoaderSettings| {
                     // Use `nearest` image sampling to preserve pixel art style.
                     settings.sampler = ImageSampler::nearest();
@@ -297,6 +306,7 @@ fn end_game(
     q_plants: Query<&Plant>,
     q_bank_account: Query<&BankAccount>,
     q_despawn_restart: Query<Entity, (With<DespawnOnRestart>, Without<EndGameDisplay>)>,
+    farm_assets: Res<FarmAssets>,
 ) {
     let Ok(bank_account) = q_bank_account.single() else {
         // No bank account
@@ -313,16 +323,18 @@ fn end_game(
         }
         commands.spawn(end_game_text(
             Name::new("GameOverText"),
-            Text::new("You ran out of money"),
+            "You ran out of money",
             LOSER_BACKGROUND,
             asset_server,
+            &farm_assets,
         ));
     } else if bank_account.balance >= WINNING_BALANCE {
         commands.spawn(end_game_text(
             Name::new("WinGameText"),
-            Text::new("WINNER"),
+            "You earned enough money to buy chain cutters! You win!",
             WINNER_BACKGROUND,
             asset_server,
+            &farm_assets,
         ));
     } else {
         return;
@@ -336,9 +348,10 @@ fn end_game(
 
 fn end_game_text(
     name: Name,
-    text: Text,
+    text: &str,
     background_color: Color,
     asset_server: Res<AssetServer>,
+    farm_assets: &FarmAssets,
 ) -> impl Bundle {
     (
         name,
@@ -357,11 +370,10 @@ fn end_game_text(
         BackgroundColor(background_color),
         children![
             (
-                Node { ..default() },
-                text,
-                TextFont {
-                    font: asset_server.load("fonts/Arbutus-Regular.ttf"),
-                    font_size: 42.0,
+                ImageNode::new(farm_assets.chain_cutters.clone()),
+                Node {
+                    min_width: Val::Px(100.),
+                    min_height: Val::Px(100.),
                     ..default()
                 },
             ),
@@ -369,14 +381,10 @@ fn end_game_text(
                 Name::new("Endgame restart button"),
                 Button,
                 EndGameRestartButton,
-                Node {
-                    // width: Val::Px(60.),
-                    height: Val::Px(40.),
-                    ..default()
-                },
+                Node { ..default() },
                 BackgroundColor(GNOME_THROW_OUTLINE),
                 children![(
-                    Text::new("Double Click to Restart"),
+                    Text::new(format!("{}\n\n Double Click to Restart", text)),
                     TextFont {
                         font: asset_server.load("fonts/Arbutus-Regular.ttf"),
                         font_size: 36.0,

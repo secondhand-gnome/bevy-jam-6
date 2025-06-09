@@ -45,11 +45,20 @@
 ## Milestone 6
 
 - [x] If a pineapple is triggered, it spreads pineapples nearby
+
+## Before End of Game Jam
+
+- [ ] Don't make UI cover map
+- [ ] Make entire endgame screen clickable
+- [ ] Restrict seed throwing inside the bounds of the farm
+- [x] Show chain clippers at the end
+- [ ] Position player in center of map
+
+## Stretch goals after game jam?
+
 - [ ] If a dragonfruit's fire hits another plant, it causes fire to spread
 - [ ] Zoom in/out on scroll or pinch
-
-## Milestone 7
-
 - [ ] Send buckets of water from the farmhouse
 - [ ] Plants now require water to grow
 - [ ] Fire can be extinguished with water
+
