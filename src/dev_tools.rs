@@ -5,15 +5,15 @@ use bevy::{
     dev_tools::states::log_transitions, input::common_conditions::input_just_pressed, prelude::*,
     ui::UiDebugOptions,
 };
-use bevy_inspector_egui::bevy_egui::EguiPlugin;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+// use bevy_inspector_egui::bevy_egui::EguiPlugin;
+// use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 pub(super) fn plugin(app: &mut App) {
     // bevy-inspector-egui
-    app.add_plugins(EguiPlugin {
-        enable_multipass_for_primary_context: true,
-    })
-    .add_plugins(WorldInspectorPlugin::new());
+    // app.add_plugins(EguiPlugin {
+    //     enable_multipass_for_primary_context: true,
+    // })
+    // .add_plugins(WorldInspectorPlugin::new());
 
     // Log `Screen` state transitions.
     app.add_systems(Update, log_transitions::<Screen>);
