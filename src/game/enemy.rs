@@ -285,7 +285,6 @@ fn pursue_plants(
 
         if plant_vectors.is_empty() {
             // No plants - Move up
-            // TODO a* pathfinding - Create a pre-set grid of points, filter valid points, and navigate them
             *enemy_velocity = LinearVelocity(ENEMY_MOVE_SPEED * Vec2::new(0., 1.));
             continue;
         }
@@ -359,7 +358,6 @@ fn pursue_plants(
                             ));
                         }
                         PlantType::Gnome => {
-                            // TODO play an animation for gnome headbutt
                             // Enemy takes damage
                             damage_enemy_events.write(DamageEnemyEvent {
                                 enemy_entity: enemy,
@@ -391,7 +389,6 @@ fn pursue_plants(
             }
         } else {
             // Move towards the plant
-            // TODO use A* pathfinding here
             *enemy_velocity = LinearVelocity(ENEMY_MOVE_SPEED * plant_vector.xy().normalize());
         }
     }

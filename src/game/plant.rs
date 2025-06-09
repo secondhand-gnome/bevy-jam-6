@@ -134,7 +134,7 @@ fn fireball(
         DespawnOnRestart,
         RigidBody::Kinematic,
         Collider::circle(FIREBALL_RADIUS_PX),
-        CollisionLayers::new([GameLayer::Fireball], [GameLayer::Enemy]), // TODO also interact with plants
+        CollisionLayers::new([GameLayer::Fireball], [GameLayer::Enemy]),
         CollisionEventsEnabled,
         Sprite {
             image: plant_assets.fireball.clone(),

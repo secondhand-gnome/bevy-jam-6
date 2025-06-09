@@ -60,4 +60,5 @@
 - [ ] Send buckets of water from the farmhouse
 - [ ] Plants now require water to grow
 - [ ] Fire can be extinguished with water
-
+- [ ] Animation for gnome headbutt
+- [ ] A* pathfinding for enemies, utilizing a tile grid
