@@ -13,6 +13,7 @@ use bevy::{
 };
 use bevy_vector_shapes::prelude::*;
 use pathfinding::prelude::astar;
+use std::f32::consts::TAU;
 
 pub const PLAYER_THROW_RADIUS_PX: f32 = 240.;
 
@@ -59,6 +60,18 @@ pub fn player(
         },
         Transform::from_translation(Vec3::new(-350.0, 0.0, 1.0)),
         player_animation,
+        children![(
+            Name::new("Chain"),
+            Sprite {
+                image: player_assets.chain.clone(),
+                ..default()
+            },
+            Transform {
+                translation: Vec3::new(-30., -30., 0.),
+                rotation: Quat::from_rotation_z(TAU / 4.),
+                scale: Vec3::splat(0.25),
+            },
+        )],
     )
 }
 
@@ -71,6 +84,8 @@ pub struct Player;
 pub struct PlayerAssets {
     #[dependency]
     farmer: Handle<Image>,
+    #[dependency]
+    chain: Handle<Image>,
     #[dependency]
     pub throw_sounds: Vec<Handle<AudioSource>>,
 }
@@ -123,6 +138,13 @@ impl FromWorld for PlayerAssets {
         Self {
             farmer: assets.load_with_settings(
                 "images/farmer.png",
+                |settings: &mut ImageLoaderSettings| {
+                    // Use `nearest` image sampling to preserve pixel art style.
+                    settings.sampler = ImageSampler::nearest();
+                },
+            ),
+            chain: assets.load_with_settings(
+                "images/chain.png",
                 |settings: &mut ImageLoaderSettings| {
                     // Use `nearest` image sampling to preserve pixel art style.
                     settings.sampler = ImageSampler::nearest();
