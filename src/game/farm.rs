@@ -8,10 +8,11 @@ use crate::game::plant::{
     plant_collision_check,
 };
 use crate::game::player::{
-    PLAYER_THROW_RADIUS_PX, Player, PlayerClickEvent, ThrowSeedEvent, throw_path,
+    PLAYER_THROW_MIN_DIST_PX, PLAYER_THROW_RADIUS_PX, Player, PlayerClickEvent, ThrowSeedEvent,
+    throw_path,
 };
 use crate::game::seed::Seed;
-use crate::theme::palette::{GNOME_THROW_OUTLINE, LOSER_BACKGROUND, WINNER_BACKGROUND};
+use crate::theme::palette::{ENDGAME_BUTTON_BACKGROUND, LOSER_BACKGROUND, WINNER_BACKGROUND};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
 use bevy::sprite::SpriteImageMode::Tiled;
@@ -221,6 +222,10 @@ fn on_player_click(
                 info!("Click out of bounds");
                 can_sow = false;
             }
+            if (click_position - player_position.as_vec2()).length() < PLAYER_THROW_MIN_DIST_PX {
+                info!("Click too close to farmer");
+                can_sow = false;
+            }
 
             let gnome_positions: Vec<IVec2> = q_grown_plants
                 .iter()
@@ -389,7 +394,7 @@ fn end_game_text(
                 Button,
                 EndGameRestartButton,
                 Node { ..default() },
-                BackgroundColor(GNOME_THROW_OUTLINE),
+                BackgroundColor(ENDGAME_BUTTON_BACKGROUND),
                 children![(
                     Text::new(format!("{}\n\n Double Click to Restart", text)),
                     TextFont {

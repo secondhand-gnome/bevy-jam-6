@@ -8,7 +8,7 @@ use crate::game::health::Health;
 use crate::game::lifespan::LifespanTimer;
 use crate::game::physics::GameLayer;
 use crate::game::smoke::SpawnSmokeEvent;
-use crate::theme::palette::{GNOME_THROW_OUTLINE, PLANT_GROWTH_FOREGROUND, PLANT_GROWTH_OUTLINE};
+use crate::theme::palette::{GNOME_THROW_OUTLINE, PLANT_GROWTH_BAR_OUTLINE, PLANT_GROWTH_FOREGROUND, PLANT_OUTLINE};
 use avian2d::prelude::{
     Collider, CollisionEventsEnabled, CollisionLayers, CollisionStarted, LinearVelocity, RigidBody,
 };
@@ -360,7 +360,7 @@ fn sow_plants(
 }
 
 fn draw_plant_circles(mut painter: ShapePainter, q_plants: Query<(&Transform, &Plant)>) {
-    painter.color = PLANT_GROWTH_OUTLINE;
+    painter.color = PLANT_OUTLINE;
     painter.hollow = true;
     painter.thickness = 0.5;
     for (plant_transform, plant) in q_plants {
@@ -384,7 +384,7 @@ fn draw_growth(
         painter.transform.translation = transform.translation + progress_offset;
         painter.hollow = true;
         painter.thickness = 0.5;
-        painter.color = PLANT_GROWTH_OUTLINE;
+        painter.color = PLANT_GROWTH_BAR_OUTLINE;
         painter.rect(progress_dimens);
 
         let progress = growth_timer.0.fraction();

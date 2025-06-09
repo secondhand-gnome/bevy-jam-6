@@ -16,6 +16,7 @@ use pathfinding::prelude::astar;
 use std::f32::consts::TAU;
 
 pub const PLAYER_THROW_RADIUS_PX: f32 = 240.;
+pub const PLAYER_THROW_MIN_DIST_PX: f32 = 30.;
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Player>();
