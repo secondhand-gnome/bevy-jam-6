@@ -10,6 +10,7 @@ use crate::game::plant::{
 use crate::game::player::{
     PLAYER_THROW_RADIUS_PX, Player, PlayerClickEvent, ThrowSeedEvent, throw_path,
 };
+use crate::game::seed::Seed;
 use crate::theme::palette::{GNOME_THROW_OUTLINE, LOSER_BACKGROUND, WINNER_BACKGROUND};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
@@ -186,6 +187,7 @@ fn on_player_click(
     mut click_events: EventReader<PlayerClickEvent>,
     mut throw_seed_events: EventWriter<ThrowSeedEvent>,
     q_player: Query<&Transform, With<Player>>,
+    q_seeds: Query<Entity, With<Seed>>,
     q_seed_selection: Reactive<SeedSelection>,
     q_farm: Query<&Farm>,
     q_plants: Query<(&Transform, &Plant)>,
@@ -202,6 +204,10 @@ fn on_player_click(
             let seed_type = seed_selection.seed_type();
 
             let mut can_sow = true;
+            if q_seeds.iter().count() > 0 {
+                info!("Seed already in flight");
+                can_sow = false;
+            }
 
             let Ok(player_transform) = q_player.single() else {
                 error!("No player found!");
@@ -230,19 +236,12 @@ fn on_player_click(
                 GNOME_THROW_RADIUS_PX,
             );
 
-            // TODO Disallow planting within radius of already requested planting destination
-
             if seed_path.is_none() {
                 info!(
                     "No path to throw from {:?} to {:?}",
                     player_position, click_position
                 );
 
-                // Play sound for invalid location
-                commands.spawn((
-                    sound_effect(farm_assets.invalid_sound.clone()),
-                    Transform::from_translation(click_position.extend(0.)),
-                ));
                 can_sow = false;
             }
 
@@ -282,6 +281,12 @@ fn on_player_click(
                     path: seed_path.unwrap(),
                     seed_type,
                 });
+            } else {
+                // Play sound is cannot sow
+                commands.spawn((
+                    sound_effect(farm_assets.invalid_sound.clone()),
+                    Transform::from_translation(click_position.extend(0.)),
+                ));
             }
         }
     }

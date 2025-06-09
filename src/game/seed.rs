@@ -50,7 +50,7 @@ pub fn seed(
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Reflect)]
 #[reflect(Component)]
-struct Seed;
+pub struct Seed;
 
 #[derive(Component, Debug, Default)]
 pub struct SeedPath {
