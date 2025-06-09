@@ -28,8 +28,8 @@ const ENEMY_DESPAWN_DISTANCE: f32 = 1500.0;
 const EAT_RADIUS_PX: f32 = 80.0;
 const SPAWN_INTERVAL_S: f32 = 1.0;
 
-const ENEMY_MOVE_SPEED: f32 = 240.0; // TODO tune down
-const ENEMY_SPAWN_LIMIT: usize = 5; // TODO tune
+const ENEMY_MOVE_SPEED: f32 = 120.0;
+const ENEMY_SPAWN_LIMIT: usize = 3;
 
 const BITE_COOLDOWN_S: f32 = 2.5;
 const BITE_STRENGTH: i32 = 1;

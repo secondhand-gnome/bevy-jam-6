@@ -26,7 +26,7 @@ const FARM_SIZE_PX: Vec2 = Vec2::new(
 );
 
 const STARTING_BALANCE: f32 = 10.0;
-pub const WINNING_BALANCE: f32 = 150.0;
+pub const WINNING_BALANCE: f32 = 50.0;
 const LOSING_BALANCE: f32 = 0.0;
 
 pub(super) fn plugin(app: &mut App) {
