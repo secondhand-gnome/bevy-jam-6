@@ -1,6 +1,5 @@
 //! Enemies eat plants.
 
-use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::audio::sound_effect;
 use crate::game::despawn::DespawnOnRestart;
@@ -14,6 +13,7 @@ use crate::game::plant::{
 };
 use crate::game::player::Player;
 use crate::theme::palette::ENEMY_EAT_OUTLINE;
+use crate::{OnPauseSystems, PausableSystems};
 use avian2d::math::TAU;
 use avian2d::prelude::*;
 use bevy::image::{ImageLoaderSettings, ImageSampler};
@@ -47,6 +47,7 @@ pub(super) fn plugin(app: &mut App) {
 
     app.add_event::<DamageEnemyEvent>();
 
+    app.add_systems(Update, freeze_enemies.in_set(OnPauseSystems));
     app.add_systems(
         Update,
         (
@@ -194,6 +195,12 @@ impl FromWorld for EnemyAssets {
             rat_damage_sound: assets.load("audio/sound_effects/rat_damage.ogg"),
             headbonk_sound: assets.load("audio/sound_effects/headbonk.ogg"),
         }
+    }
+}
+
+fn freeze_enemies(mut q_enemies: Query<&mut LinearVelocity, With<Enemy>>) {
+    for mut vel in q_enemies.iter_mut() {
+        *vel = LinearVelocity::ZERO;
     }
 }
 

@@ -1,8 +1,8 @@
-use crate::PausableSystems;
 use crate::asset_tracking::LoadResource;
 use crate::game::despawn::DespawnOnRestart;
 use crate::game::plant::{PlantType, SowPlantEvent};
 use crate::game::player::ThrowSeedEvent;
+use crate::{OnPauseSystems, PausableSystems};
 use avian2d::prelude::{LinearVelocity, RigidBody};
 use bevy::image::{ImageLoaderSettings, ImageSampler};
 use bevy::prelude::*;
@@ -18,6 +18,7 @@ pub(super) fn plugin(app: &mut App) {
     app.register_type::<SeedAssets>();
     app.load_resource::<SeedAssets>();
 
+    app.add_systems(Update, freeze_seeds.in_set(OnPauseSystems));
     app.add_systems(
         Update,
         (create_seeds, move_seeds)
@@ -101,6 +102,12 @@ fn create_seeds(
             },
             origin.as_vec2().extend(SEED_Z_LAYER),
         ));
+    }
+}
+
+fn freeze_seeds(mut q_seeds: Query<&mut LinearVelocity, With<Seed>>) {
+    for mut vel in q_seeds.iter_mut() {
+        *vel = LinearVelocity::ZERO;
     }
 }
 

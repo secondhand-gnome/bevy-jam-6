@@ -73,6 +73,7 @@ impl Plugin for AppPlugin {
         // Set up the `Pause` state.
         app.init_state::<Pause>();
         app.configure_sets(Update, PausableSystems.run_if(in_state(Pause(false))));
+        app.configure_sets(Update, OnPauseSystems.run_if(in_state(Pause(true))));
 
         // Spawn the main camera.
         app.add_systems(Startup, spawn_camera);
@@ -96,6 +97,10 @@ enum AppSystems {
 #[derive(States, Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
 #[states(scoped_entities)]
 struct Pause(pub bool);
+
+/// A system set for systems that shouldn't run while the game is paused.
+#[derive(SystemSet, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+struct OnPauseSystems;
 
 /// A system set for systems that shouldn't run while the game is paused.
 #[derive(SystemSet, Copy, Clone, Eq, PartialEq, Hash, Debug)]
