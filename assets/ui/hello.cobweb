@@ -5,7 +5,7 @@ $pineapple_sprite = "images/plants/pineapple.png"
 $gnome_sprite = "images/plants/gnome.png"
 
 +seed_item = \
-    GridNode{ justify_main:Center justify_self_cross:Stretch width:106px height:86px }
+    GridNode{ justify_main:Center justify_self_cross:Stretch width:64px height:80px }
     Splat<Border>(1px)
     Splat<Margin>(2px)
     BrRadius(5px)
@@ -13,7 +13,7 @@ $gnome_sprite = "images/plants/gnome.png"
     Responsive<BackgroundColor>{ idle:#4f5269 hover:#96f5d9 press:#6eced4 }
 
     "sprite"
-        FlexNode{ justify_main:Center justify_self_cross:Stretch width:36px height:36px margin:{top:8px left:8px right:8px}}
+        FlexNode{ justify_main:Center justify_self_cross:Stretch width:30px height:30px margin:{top:8px left:8px right:8px}}
         LoadedImageNode{image:$daisy_sprite}
 
     "text"
@@ -38,10 +38,10 @@ LoadFonts["Arbutus"]
 
 #scenes
 "scene"
-    GridNode{ padding:{top:8px bottom:8px left:8px right:8px}, margin:{top:8px left:8px} }
+    GridNode{ padding:{top:2px bottom:2px left:2px right:2px}, margin:{top:2px left:2px} }
 
     "reset_button"
-        FlexNode{ width:64px height:40px padding:{top:8px bottom:8px left:8px right:8px}, margin:{top:8px left:8px}}
+        FlexNode{ width:48px height:30px margin:{top:8px left:8px}}
         BackgroundColor(#bce7ff)
         Splat<Border>(1px)
         Splat<Margin>(2px)
@@ -69,7 +69,7 @@ LoadFonts["Arbutus"]
                 "sprite"
                     LoadedImageNode{image:$pineapple_sprite}
                 "text"
-                    TextLine{ text:"Pineapple\n$2" size:12 font:{family:"Arbutus"} }
+                    TextLine{ text:"Pineapple\n$2" size:10 font:{family:"Arbutus"} }
             }
 
         "seed_button_dragonfruit"
@@ -77,7 +77,7 @@ LoadFonts["Arbutus"]
                 "sprite"
                     LoadedImageNode{image:$dragonfruit_sprite}
                 "text"
-                    TextLine{ text:"Dragonfruit\n$3" size:12 font:{family:"Arbutus"} }
+                    TextLine{ text:"Dragonfruit\n$3" size:8 font:{family:"Arbutus"} }
             }
 
         "seed_button_gnome"
@@ -89,7 +89,7 @@ LoadFonts["Arbutus"]
             }
 
     "current_seed"
-        TextLine{text:"Current seed: ?" font:{family:"Arbutus"} }
+        TextLine{text:"Current seed:\n?\n" size:18 font:{family:"Arbutus"} }
 
     "bank"
-        TextLine{text:"Bank balance: $10" font:{family:"Arbutus"} }
+        TextLine{text:"Bank balance\n$10" size:18 font:{family:"Arbutus"} }

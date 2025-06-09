@@ -58,7 +58,7 @@ pub fn player(
             }),
             ..default()
         },
-        Transform::from_translation(Vec3::new(-350.0, 0.0, 1.0)),
+        Transform::from_translation(Vec3::new(-0.0, 0.0, 1.0)),
         player_animation,
         children![(
             Name::new("Chain"),

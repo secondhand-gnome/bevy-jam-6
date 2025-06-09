@@ -48,11 +48,11 @@
 
 ## Before End of Game Jam
 
-- [ ] Don't make UI cover map
+- [x] Don't make UI cover map
 - [ ] Make entire endgame screen clickable
 - [ ] Restrict seed throwing inside the bounds of the farm
 - [x] Show chain clippers at the end
-- [ ] Position player in center of map
+- [x] Position player in center of map
 
 ## Stretch goals after game jam?
 

@@ -81,7 +81,7 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                       q_seed_selection: Reactive<SeedSelection>| {
                     let (_, seed_selection) = q_seed_selection.single();
                     let seed_type = seed_selection.seed_type();
-                    write_text!(editor, *id, "Current seed: {:?}", seed_type);
+                    write_text!(editor, *id, "Current seed:\n{:?}\n\n", seed_type);
                     info!("Update UI for seed type {:?}", seed_type);
                 },
             );
@@ -97,7 +97,7 @@ pub fn build_ui(mut commands: Commands, mut scene_builder: SceneBuilder) {
                     write_text!(
                         editor,
                         *id,
-                        "Bank balance: ${}/${}",
+                        "Bank balance:\n${}/${}",
                         balance,
                         WINNING_BALANCE
                     );

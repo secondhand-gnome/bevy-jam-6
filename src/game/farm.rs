@@ -18,7 +18,7 @@ use bevy_cobweb::prelude::Reactive;
 use bevy_vector_shapes::prelude::*;
 
 const TILE_SIZE_PX: f32 = 128.;
-const FARM_SIZE_TILES: Vec2 = Vec2::new(10., 8.);
+const FARM_SIZE_TILES: Vec2 = Vec2::new(7., 4.);
 const FARM_SIZE_PX: Vec2 = Vec2::new(
     FARM_SIZE_TILES.x * TILE_SIZE_PX,
     FARM_SIZE_TILES.y * TILE_SIZE_PX,
