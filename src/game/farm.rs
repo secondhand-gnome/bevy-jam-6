@@ -209,6 +209,13 @@ fn on_player_click(
             };
 
             let player_position = player_transform.translation.xy().as_ivec2();
+            if click_position.x.abs() > FARM_SIZE_PX.x / 2.
+                || click_position.y.abs() > FARM_SIZE_PX.y / 2.
+            {
+                info!("Click out of bounds");
+                can_sow = false;
+            }
+
             let gnome_positions: Vec<IVec2> = q_grown_plants
                 .iter()
                 .filter(|(_, p)| p.plant_type() == PlantType::Gnome)
@@ -224,7 +231,6 @@ fn on_player_click(
             );
 
             // TODO Disallow planting within radius of already requested planting destination
-            // TODO restrict throwing just to within the farm territory
 
             if seed_path.is_none() {
                 info!(
