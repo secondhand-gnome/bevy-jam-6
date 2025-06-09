@@ -8,7 +8,9 @@ use crate::game::health::Health;
 use crate::game::lifespan::LifespanTimer;
 use crate::game::physics::GameLayer;
 use crate::game::smoke::SpawnSmokeEvent;
-use crate::theme::palette::{GNOME_THROW_OUTLINE, PLANT_GROWTH_BAR_OUTLINE, PLANT_GROWTH_FOREGROUND, PLANT_OUTLINE};
+use crate::theme::palette::{
+    GNOME_THROW_OUTLINE, PLANT_GROWTH_BAR_OUTLINE, PLANT_GROWTH_FOREGROUND, PLANT_OUTLINE,
+};
 use avian2d::prelude::{
     Collider, CollisionEventsEnabled, CollisionLayers, CollisionStarted, LinearVelocity, RigidBody,
 };
@@ -18,6 +20,7 @@ use bevy_cobweb::prelude::*;
 use bevy_vector_shapes::painter::ShapePainter;
 use bevy_vector_shapes::prelude::*;
 use rand::prelude::SliceRandom;
+use std::fmt::Formatter;
 
 pub const GNOME_THROW_RADIUS_PX: f32 = 500.;
 const DAISY_GROWTH_TIME_S: f32 = 3.;
@@ -228,6 +231,18 @@ impl PlantType {
             PlantType::Dragonfruit => DRAGONFRUIT_PRICE,
             PlantType::Gnome => GNOME_PRICE,
         }
+    }
+}
+
+impl std::fmt::Display for PlantType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            PlantType::Daisy => "Daisy",
+            PlantType::Pineapple(_) => "Pineapple",
+            PlantType::Dragonfruit => "Dragonfruit",
+            PlantType::Gnome => "Gnome",
+        };
+        write!(f, "{}", s)
     }
 }
 
